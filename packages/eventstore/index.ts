@@ -38,6 +38,7 @@ export interface Adapter<Event> {
 }
 
 export type EventStoreParser<Event> = (event: unknown) => Event | Error
+
 export interface CreateEventStoreOptions<State, Event> {
   readonly state: State,
   readonly parser: EventStoreParser<Event>,
