@@ -14,7 +14,7 @@ export class CorruptionError extends Error {
   }
 }
 
-export type Replay<State, Event> = (events: Event[]) => State
+export type Replay<State, Event> = (previousState: State, event: Event) => State
 
 export type Subscriber = () => void;
 
@@ -61,7 +61,13 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
       return events;
     }
 
-    return options.replay(events);
+    let state: State = options.state;
+
+    for (const event of events) {
+      state = options.replay(state, event);
+    }
+
+    return state;
   }
 
   async function getEvents() {
