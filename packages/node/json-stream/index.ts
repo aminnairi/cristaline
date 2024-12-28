@@ -2,7 +2,7 @@ import { ZodSchema } from "zod";
 import { Adapter, ReleaseLockFunction } from "@aminnairi/eventstore";
 import { appendFile, readFile, stat, writeFile } from "node:fs/promises";
 
-export interface JsonStreamAdapterOptions {
+export interface NodeJsonStreamAdapterOptions {
   readonly path: string,
   readonly eventSchema: ZodSchema,
   readonly stateSchema: ZodSchema
@@ -35,7 +35,7 @@ export function createLock() {
   return acquireLock;
 }
 
-export class JsonStreamAdapter<Event> implements Adapter<Event> {
+export class NodeJsonStreamAdapter<Event> implements Adapter<Event> {
   private lock: Promise<void> | null = null;
 
   private constructor(private readonly path: string) { }
@@ -54,8 +54,8 @@ export class JsonStreamAdapter<Event> implements Adapter<Event> {
     return releaseLock;
   }
 
-  public static for<Event>(options: JsonStreamAdapterOptions) {
-    return new JsonStreamAdapter<Event>(options.path);
+  public static for<Event>(options: NodeJsonStreamAdapterOptions) {
+    return new NodeJsonStreamAdapter<Event>(options.path);
   }
 
   public async save(event: Event): Promise<void> {
