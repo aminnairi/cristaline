@@ -4,11 +4,11 @@ import { createEventStore } from "@aminnairi/eventstore";
 import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
 
 export interface EventStoreContextInterface<State, Event extends EventShape> {
-  state: TransientState<State>,
-  events: TransientState<Event[]>,
   fetchState: () => void,
   fetchEvents: () => void,
   saveEvent: (event: Event) => void
+  state: TransientState<Readonly<State>>,
+  events: TransientState<ReadonlyArray<Event>>,
 }
 
 export interface EventStoreProviderProps {
@@ -61,11 +61,11 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
   });
 
   function EventStoreProvider({ children }: EventStoreProviderProps) {
-    const [events, setEvents] = useState<TransientState<Event[]>>({
+    const [events, setEvents] = useState<TransientState<ReadonlyArray<Event>>>({
       type: "loading"
     });
 
-    const [state, setState] = useState<TransientState<State>>({
+    const [state, setState] = useState<TransientState<Readonly<State>>>({
       type: "loading"
     });
 
