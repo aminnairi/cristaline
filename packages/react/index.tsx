@@ -9,6 +9,7 @@ export interface EventStoreContextInterface<State, Event extends EventShape> {
   saveEvent: (event: Event) => void
   state: TransientState<Readonly<State>>,
   events: TransientState<ReadonlyArray<Event>>,
+  refresh: () => Promise<void>
 }
 
 export interface EventStoreProviderProps {
@@ -48,6 +49,7 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
     fetchEvents: () => { },
     fetchState: () => { },
     saveEvent: () => { }
+    refresh: async () => { }
   });
 
   const eventStore = createEventStore<State, Event>({
@@ -113,26 +115,42 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
       }
     }, []);
 
-    const fetchState = useMemo(() => async () => {
+    const refresh = useMemo(() => async () => {
       try {
+        setEvents({
+          type: "loading"
+        });
+
         setState({
           type: "loading"
         });
 
-        const newState = await eventStore.getState();
+        const error = await eventStore.initialize();
 
-        if (newState instanceof Error) {
-          throw newState;
+        if (error instanceof Error) {
+          return Promise.reject(error);
         }
 
         setState({
           type: "loaded",
-          value: newState
+          value: eventStore.getState()
+        });
+
+        setEvents({
+          type: "loaded",
+          value: eventStore.getEvents()
         });
       } catch (error) {
+        const normalizedError = error instanceof Error ? error : new Error(String(error));
+
+        setEvents({
+          type: "issue",
+          error: normalizedError
+        });
+
         setState({
           type: "issue",
-          error: error instanceof Error ? error : new Error(String(error))
+          error: normalizedError
         });
       }
     }, []);
@@ -144,6 +162,7 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
         fetchEvents,
         fetchState,
         saveEvent
+        refresh
       };
     }, [state, events]);
 
