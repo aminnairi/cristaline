@@ -1,6 +1,6 @@
 import { createEventStore } from "@aminnairi/eventstore";
 import { z } from "zod";
-import { JsonStreamAdapter } from "@aminnairi/eventstore-node-jsonstream";
+import { NodeJsonStreamAdapter } from "@aminnairi/eventstore-node-json-stream";
 
 const stateSchema = z.object({
   users: z.array(z.object({
