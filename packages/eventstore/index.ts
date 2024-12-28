@@ -24,9 +24,9 @@ export type SubscribeFunction = (subscriber: Subscriber) => UnsubscribeFunction
 
 export interface EventStore<State, Event> {
   readonly saveEvent: (event: Event) => Promise<void>;
-  readonly getState: () => Promise<State | CorruptionError>
   readonly subscribe: SubscribeFunction
   readonly getEvents: () => ReadonlyArray<Event>;
+  readonly getState: () => Readonly<State>;
 }
 
 export type ReleaseLockFunction = () => void;
@@ -49,45 +49,29 @@ export interface CreateEventStoreOptions<State, Event> {
 export function createEventStore<State, Event extends EventShape>(options: CreateEventStoreOptions<State, Event>): EventStore<State, Event> {
   const subscribers: Subscriber[] = [];
 
+  let state: State = options.state;
   let events: ReadonlyArray<Event> = [];
   async function saveEvent(event: Event): Promise<void> {
     await options.adapter.save(event);
 
+    state = options.replay(state, event);
     subscribers.forEach(notify => {
       notify();
     });
   }
 
-  async function getState(): Promise<State | CorruptionError> {
 
-    if (events instanceof Error) {
-      return events;
     }
 
-    let state: State = options.state;
 
-    for (const event of events) {
-      state = options.replay(state, event);
-    }
+      if (parsedEvent instanceof Error) {
 
+
+
+
+  function getState(): Readonly<State> {
     return state;
   }
-
-  async function getEvents() {
-    const serializedEvents = await options.adapter.retrieve();
-    const eventsOrErrors = serializedEvents.map(serializedEvent => options.parser(serializedEvent));
-
-    const [events, corruptionError] = eventsOrErrors.reduce(([events, corruptionError], eventOrError) => {
-      if (eventOrError instanceof Error) {
-        return [events, new CorruptionError([...corruptionError.errors, eventOrError])];
-      }
-
-      return [[...events, eventOrError], corruptionError]
-    }, [[], new CorruptionError([])] as [Event[], CorruptionError]);
-
-    if (corruptionError.errors.length !== 0) {
-      return corruptionError;
-    }
 
   function getEvents(): ReadonlyArray<Event> {
     return events;
