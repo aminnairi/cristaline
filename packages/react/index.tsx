@@ -4,8 +4,6 @@ import { createEventStore } from "@aminnairi/eventstore";
 import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
 
 export interface EventStoreContextInterface<State, Event extends EventShape> {
-  fetchState: () => void,
-  fetchEvents: () => void,
   saveEvent: (event: Event) => void
   state: TransientState<Readonly<State>>,
   events: TransientState<ReadonlyArray<Event>>,
@@ -46,8 +44,6 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
     state: {
       type: "loading"
     },
-    fetchEvents: () => { },
-    fetchState: () => { },
     saveEvent: () => { }
     refresh: async () => { }
   });
@@ -77,40 +73,31 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
           type: "loading"
         });
 
-        await eventStore.saveEvent(event);
-
-        await Promise.all([
-          fetchEvents(),
-          fetchState()
-        ]);
-      } catch (error) {
-        setEvents({
-          type: "issue",
-          error: error instanceof Error ? error : new Error(String(error))
-        });
-      }
-    }, []);
-
-    const fetchEvents = useMemo(() => async () => {
-      try {
-        setEvents({
+        setState({
           type: "loading"
         });
 
-        const newEvents = await eventStore.getEvents();
+        await eventStore.saveEvent(event);
 
-        if (newEvents instanceof Error) {
-          throw newEvents;
-        }
+        setState({
+          type: "loaded",
+          value: eventStore.getState()
+        });
 
         setEvents({
           type: "loaded",
-          value: newEvents
+          value: eventStore.getEvents()
         });
       } catch (error) {
+        const normalizedError = error instanceof Error ? error : new Error(String(error));
+
+        setState({
+          type: "issue",
+          error: normalizedError
+        });
         setEvents({
           type: "issue",
-          error: error instanceof Error ? error : new Error(String(error))
+          error: normalizedError
         });
       }
     }, []);
@@ -159,8 +146,6 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
       return {
         state,
         events,
-        fetchEvents,
-        fetchState,
         saveEvent
         refresh
       };
