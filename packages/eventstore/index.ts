@@ -24,9 +24,9 @@ export type SubscribeFunction = (subscriber: Subscriber) => UnsubscribeFunction
 
 export interface EventStore<State, Event> {
   readonly saveEvent: (event: Event) => Promise<void>;
-  readonly getEvents: () => Promise<Event[] | CorruptionError>;
   readonly getState: () => Promise<State | CorruptionError>
   readonly subscribe: SubscribeFunction
+  readonly getEvents: () => ReadonlyArray<Event>;
 }
 
 export type ReleaseLockFunction = () => void;
@@ -49,6 +49,7 @@ export interface CreateEventStoreOptions<State, Event> {
 export function createEventStore<State, Event extends EventShape>(options: CreateEventStoreOptions<State, Event>): EventStore<State, Event> {
   const subscribers: Subscriber[] = [];
 
+  let events: ReadonlyArray<Event> = [];
   async function saveEvent(event: Event): Promise<void> {
     await options.adapter.save(event);
 
@@ -58,7 +59,6 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
   }
 
   async function getState(): Promise<State | CorruptionError> {
-    const events = await getEvents();
 
     if (events instanceof Error) {
       return events;
@@ -89,6 +89,7 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
       return corruptionError;
     }
 
+  function getEvents(): ReadonlyArray<Event> {
     return events;
   }
 
