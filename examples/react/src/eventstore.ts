@@ -43,7 +43,7 @@ export const { EventStoreProvider, useEventStore } = defineEventStore<State, Eve
     users: []
   },
   adapter: WebStorageAdapter.for({
-    eventsKey: "events",
+    key: "events",
     storage: localStorage
   }),
   replay: (state, event) => {
