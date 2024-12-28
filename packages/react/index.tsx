@@ -4,9 +4,9 @@ import { createEventStore } from "@aminnairi/eventstore";
 import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
 
 export interface EventStoreContextInterface<State, Event extends EventShape> {
-  saveEvent: (event: Event) => void
   state: TransientState<Readonly<State>>,
   events: TransientState<ReadonlyArray<Event>>,
+  saveEvent: (event: Event) => void,
   refresh: () => Promise<void>
 }
 
@@ -44,7 +44,7 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
     state: {
       type: "loading"
     },
-    saveEvent: () => { }
+    saveEvent: () => { },
     refresh: async () => { }
   });
 
@@ -146,7 +146,7 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
       return {
         state,
         events,
-        saveEvent
+        saveEvent,
         refresh
       };
     }, [state, events]);
