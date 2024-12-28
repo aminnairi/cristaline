@@ -47,7 +47,7 @@ const { saveEvent, getState } = await createEventStore<State, Event>({
   parser: event => {
     return eventSchema.parse(event);
   },
-  adapter: JsonStreamAdapter.for({
+  adapter: NodeJsonStreamAdapter.for({
     path: "database.jsonl",
     eventSchema,
     stateSchema
