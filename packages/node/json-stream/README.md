@@ -36,9 +36,9 @@ Here is an example usage of this library in the context of a Web application.
 > We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
 
 ```typescript
-import { createEventStore } from "@aminnairi/eventstore"
+import { EventShape, createEventStore } from "@aminnairi/eventstore"
 import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage"
-import { z } from "zod";
+import { ZodSchema, z } from "zod";
 
 const eventSchema = z.union([
   z.object({
@@ -50,7 +50,7 @@ const eventSchema = z.union([
       id: z.string(),
       email: z.string()
     })
-  }),
+  }) satisfies ZodSchema<EventShape>,
   z.object({
     type: z.literal("USER_UPDATED"),
     version: z.literal(1),
@@ -60,7 +60,7 @@ const eventSchema = z.union([
       id: z.string().uuid(),
       email: z.string().email()
     })
-  })
+  }) satisfies ZodSchema<EventShape>
 ])
 
 type Event = z.infer<typeof eventSchema>
@@ -174,6 +174,155 @@ if (events instanceof Error) {
 ```
 
 See [`examples`](../../examples/) for a more detailed list of examples.
+
+## @aminnairi/eventstore
+
+### createEventStore
+
+#### Example
+
+```typescript
+import { EventShape, createEventStore } from "@aminnairi/eventstore";
+import { ZodSchema, z } from "zod";
+
+const eventSchema = z.union([
+  z.object({
+    type: z.literal("USER_CREATED"),
+    version: z.literal(1),
+    identifier: z.string(),
+    date: z.date({ coerce: true }),
+    data: z.object({
+      id: z.string(),
+      email: z.string(),
+    }),
+  }) satisfies ZodSchema<EventShape>,
+  z.object({
+    type: z.literal("USER_UPDATED"),
+    version: z.literal(1),
+    identifier: z.string(),
+    date: z.date({ coerce: true }),
+    data: z.object({
+      id: z.string(),
+      email: z.string(),
+    }),
+  }) satisfies ZodSchema<EventShape>,
+]);
+
+type Event = z.infer<typeof eventSchema>
+
+type User = {
+  email: string
+}
+
+type State = {
+  users: Array<User>
+}
+
+const eventStore = createEventStore<State, Event>({
+  parser: eventSchema.parse,
+  state: {
+    users: []
+  },
+  adapter: WebStorageAdapter.for({
+    key: "events",
+    storage: window.localStorage,
+  }),
+  replay: (state, event) => {
+    switch (event.type) {
+      case "USER_CREATED":
+        return {
+          ...state,
+          users: [
+            ...state.users,
+            user,
+          ],
+        }
+
+      case "USER_UPDATED":
+        return {
+          ...state,
+          users: state.users.map(user => {
+            if (user.id !== event.data.id) {
+              return user;
+            }
+
+            return {
+              ...user,
+              ...event.data,
+            };
+          }),
+        }
+    }
+  },
+});
+```
+
+### initialize
+
+#### Example
+
+```typescript
+const error = await eventStore.initialize();
+
+if (error instanceof Error) {
+  console.error("Database corrupted.");
+} else {
+  console.log("Database initialized.");
+}
+```
+
+### getEvents
+
+#### Example
+
+```typescript
+const events = eventStore.getEvents();
+
+for (const event of events) {
+  console.log(event.type);
+}
+```
+
+### getState
+
+```typescript
+const state = eventStore.getState();
+
+for (const user of state.users) {
+  console.log(user.email);
+}
+```
+
+### saveEvent
+
+#### Example
+
+```typescript
+const error = await eventStore.saveEvent({
+  type: "USER_CREATED",
+  version: 1,
+  date: new Date(),
+  identifier: crypto.randomUUID(),
+  data: {
+    id: crypto.randomUUID(),
+    email: "first@app.com",
+  },
+});
+
+if (error instanceof Error) {
+  console.error("Failed to create a new user.");
+} else {
+  console.log("User created successfully");
+}
+```
+
+### subscribe
+
+```typescript
+eventStore.subscribe(() => {
+  console.log("New event added.");
+});
+```
 
 ## What Is `@aminnairi/eventstore`
 
