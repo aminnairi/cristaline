@@ -28,7 +28,7 @@ export function HomePage() {
     );
   }
 
-  if (state.type === "error") {
+  if (state.type === "issue") {
     return (
       <div>
         <h1>Error</h1>

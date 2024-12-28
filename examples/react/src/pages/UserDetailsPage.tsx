@@ -57,7 +57,7 @@ export function UserDetailsPage() {
     );
   }
 
-  if (state.type === "error") {
+  if (state.type === "issue") {
     return (
       <h1>Error</h1>
     );

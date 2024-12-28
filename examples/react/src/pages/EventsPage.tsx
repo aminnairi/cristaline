@@ -14,7 +14,7 @@ export function EventsPage() {
     );
   }
 
-  if (events.type === "error") {
+  if (events.type === "issue") {
     return (
       <h1>Error</h1>
     );
