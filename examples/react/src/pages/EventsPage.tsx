@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { useDatabase } from "../hooks/useDatabase"
+import { useEventStore } from "../eventstore";
 
 export function EventsPage() {
-  const { events, fetchEvents } = useDatabase();
+  const { events, fetchEvents } = useEventStore();
 
   useEffect(() => {
     fetchEvents()

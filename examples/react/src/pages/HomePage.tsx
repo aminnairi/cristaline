@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from "react";
-import { useDatabase } from "../hooks/useDatabase";
 import { Link } from "react-router";
+import { useEventStore } from "../eventstore";
 
 export function HomePage() {
-  const { state, saveEvent, fetchState } = useDatabase();
+  const { state, saveEvent, fetchState } = useEventStore();
 
   const addUser = useCallback(() => {
     saveEvent({

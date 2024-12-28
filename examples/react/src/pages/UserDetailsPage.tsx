@@ -1,9 +1,9 @@
 import { useParams } from "react-router";
-import { useDatabase } from "../hooks/useDatabase";
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useEventStore } from "../eventstore";
 
 export function UserDetailsPage() {
-  const { state, saveEvent, fetchState } = useDatabase();
+  const { state, saveEvent, fetchState } = useEventStore();
   const params = useParams();
   const userId = useMemo(() => params["userId"], [params]);
   const [email, setEmail] = useState("");
