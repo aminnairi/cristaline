@@ -2,51 +2,6 @@
 
 An immutable database engine built on the Event Sourcing pattern.
 
-## Introduction
-
-`@aminnairi/eventstore` is a library designed to implement the Event Sourcing pattern.
-
-Event Sourcing allows you to capture a stream of immutable events that occur throughout the lifecycle of an application. These events serve as the single source of truth and can be reduced to derive the current state of your application at any point in time.
-
-## Why Use Event Sourcing?
-
-Traditional databases store only the final state of an application at a specific moment, limiting historical visibility. Event Sourcing, on the other hand, preserves the complete history of changes, enabling you to retrace your application’s state over time.
-
-This approach provides:
-- **Enhanced traceability**: Track every change since the inception of your data.
-- **Fine-grained analytics**: Understand not just the current state but how it evolved.
-- **Time-travel debugging**: Investigate past states to diagnose issues with precision.
-
-Event Sourcing is ideal for applications requiring robust auditing, analytics, and historical data insights.
-
-## Who Is It For?
-
-This library is suited for:
-- **Functional programming enthusiasts** who value immutability and state derivation through pure functions.
-- **Businesses demanding high traceability** in analytics, auditing, and compliance, benefiting from the immutable nature of events rather than mutable state.
-
-By storing events instead of derived states, you gain unparalleled visibility into what occurred, when, and why, making investigations and analyses significantly easier.
-
-## State Reconstruction
-
-State reconstruction involves reducing a series of events into a single, coherent state representation. This allows you to interact with your application's current state while maintaining the complete traceability and history of events.
-
-## Event Versioning
-
-As your application's requirements evolve, so will the structure of your events. Unlike traditional database systems that overwrite schema changes (e.g., `ALTER TABLE`), Event Sourcing ensures that all historical data remains intact by introducing new event versions.
-
-This approach allows:
-- **Backward compatibility**: Preserve and utilize older events.
-- **Forward evolution**: Support more complex business requirements without compromising historical data integrity.
-
-Event versioning ensures that no information is lost, providing a secure and auditable evolution of your application’s state.
-
-## Adapter Pattern
-
-The library leverages the Adapter Pattern to enable seamless integration with any storage backend of your choice.
-
-Whether you use the included Web Storage or Node.js JSON Stream adapters, or implement your own custom adapter, `@aminnairi/eventstore` provides portability and the flexibility to decide where and how your data is stored while handling the core Event Sourcing logic for you.
-
 ## Requirements
 
 - [Node](https://nodejs.org)
@@ -58,7 +13,21 @@ Whether you use the included Web Storage or Node.js JSON Stream adapters, or imp
 npm install @aminnairi/eventstore
 ```
 
+## Adapter installation
+
+You'll need an adapter, whether it is one that is included in this library like [`WebStorageAdapter`](../web/storage) or [`JsonStreamAdapter`](../node/jsonstream) or your own in order to use this library.
+
+```bash
+npm install @aminnairi/eventstore-web-storage
+# or
+npm install @aminnairi/eventstore-node-json-stream
+```
+
+See [`packages`](../../packages) for a list of packages available.
+
 ## Usage
+
+Here is an example usage of this library in the context of a Web application.
 
 > [!NOTE]
 > We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
@@ -201,7 +170,49 @@ if (events instanceof Error) {
 }
 ```
 
-## Example
+See [`examples`](../../examples/) for a more detailed list of examples.
 
-See [`examples`](../../example/).
+## What Is `@aminnairi/eventstore`
 
+`@aminnairi/eventstore` is a library designed to implement the Event Sourcing pattern.
+
+Event Sourcing allows you to capture a stream of immutable events that occur throughout the lifecycle of an application. These events serve as the single source of truth and can be reduced to derive the current state of your application at any point in time.
+
+## Why Use Event Sourcing
+
+Traditional databases store only the final state of an application at a specific moment, limiting historical visibility. Event Sourcing, on the other hand, preserves the complete history of changes, enabling you to retrace your application’s state over time.
+
+This approach provides:
+- **Enhanced traceability**: Track every change since the inception of your data.
+- **Fine-grained analytics**: Understand not just the current state but how it evolved.
+- **Time-travel debugging**: Investigate past states to diagnose issues with precision.
+
+Event Sourcing is ideal for applications requiring robust auditing, analytics, and historical data insights.
+
+## Who Is It For
+
+This library is suited for:
+- **Functional programming enthusiasts** who value immutability and state derivation through pure functions.
+- **Businesses demanding high traceability** in analytics, auditing, and compliance, benefiting from the immutable nature of events rather than mutable state.
+
+By storing events instead of derived states, you gain unparalleled visibility into what occurred, when, and why, making investigations and analyses significantly easier.
+
+## State Reconstruction
+
+State reconstruction involves reducing a series of events into a single, coherent state representation. This allows you to interact with your application's current state while maintaining the complete traceability and history of events.
+
+## Event Versioning
+
+As your application's requirements evolve, so will the structure of your events. Unlike traditional database systems that overwrite schema changes (e.g., `ALTER TABLE`), Event Sourcing ensures that all historical data remains intact by introducing new event versions.
+
+This approach allows:
+- **Backward compatibility**: Preserve and utilize older events.
+- **Forward evolution**: Support more complex business requirements without compromising historical data integrity.
+
+Event versioning ensures that no information is lost, providing a secure and auditable evolution of your application’s state.
+
+## Adapter Pattern
+
+The library leverages the Adapter Pattern to enable seamless integration with any storage backend of your choice.
+
+Whether you use the included Web Storage or Node.js JSON Stream adapters, or implement your own custom adapter, `@aminnairi/eventstore` provides portability and the flexibility to decide where and how your data is stored while handling the core Event Sourcing logic for you.
