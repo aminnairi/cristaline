@@ -1,5 +1,5 @@
 import { EventShape, EventStoreParser, Replay } from "@aminnairi/eventstore";
-import { createContext, ReactNode, useContext, useMemo, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { createEventStore } from "@aminnairi/eventstore";
 import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
 
@@ -146,6 +146,10 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
         saveEvent
       };
     }, [state, events]);
+
+    useEffect(() => {
+      refresh()
+    }, []);
 
     return (
       <EventStoreContext.Provider value={value}>
