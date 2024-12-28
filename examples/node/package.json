@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "@aminnairi/eventstore-example-node",
+  "scripts": {
+    "start": "tsx index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
+  }
+}
