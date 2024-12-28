@@ -1,13 +1,22 @@
 import { useParams } from "react-router";
-import { useEventStore } from "../hooks/useEventStore";
+import { useDatabase } from "../hooks/useDatabase";
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 export function UserDetailsPage() {
-  const { state, saveEvent } = useEventStore();
+  const { state, saveEvent, fetchState } = useDatabase();
   const params = useParams();
   const userId = useMemo(() => params["userId"], [params]);
-  const user = useMemo(() => state.type === "state" && state.users.find(user => user.id === userId), [userId, state]);
   const [email, setEmail] = useState("");
+
+  const user = useMemo(() => {
+    if (state.type !== "loaded") {
+      return;
+    }
+
+    return state.value.users.find(user => {
+      return user.id === userId
+    });
+  }, [state, userId]);
 
   const onEmailChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
@@ -31,6 +40,10 @@ export function UserDetailsPage() {
       }
     });
   }, [userId, saveEvent, email]);
+
+  useEffect(() => {
+    fetchState();
+  }, [fetchState]);
 
   useEffect(() => {
     if (user) {

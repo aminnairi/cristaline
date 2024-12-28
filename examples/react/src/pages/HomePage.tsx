@@ -1,9 +1,9 @@
-import { useCallback } from "react";
-import { useEventStore } from "../hooks/useEventStore";
+import { useCallback, useEffect } from "react";
+import { useDatabase } from "../hooks/useDatabase";
 import { Link } from "react-router";
 
 export function HomePage() {
-  const { state, saveEvent } = useEventStore();
+  const { state, saveEvent, fetchState } = useDatabase();
 
   const addUser = useCallback(() => {
     saveEvent({
@@ -18,6 +18,10 @@ export function HomePage() {
     })
   }, [saveEvent]);
 
+  useEffect(() => {
+    fetchState();
+  }, [fetchState]);
+
   if (state.type === "loading") {
     return (
       <h1>Loading</h1>
@@ -30,7 +34,7 @@ export function HomePage() {
         <h1>Error</h1>
         <pre>
           <code>
-            {state.error}
+            {state.error.message}
           </code>
         </pre>
       </div>
@@ -44,7 +48,7 @@ export function HomePage() {
       </button>
       <table>
         <tbody>
-          {state.users.map(user => (
+          {state.value.users.map(user => (
             <tr key={user.email}>
               <td>
                 <Link to={`/users/${user.id}`}>{user.email}</Link>

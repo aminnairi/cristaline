@@ -1,7 +1,12 @@
-import { useEventStore } from "../hooks/useEventStore"
+import { useEffect } from "react";
+import { useDatabase } from "../hooks/useDatabase"
 
 export function EventsPage() {
-  const { events } = useEventStore();
+  const { events, fetchEvents } = useDatabase();
+
+  useEffect(() => {
+    fetchEvents()
+  }, [fetchEvents]);
 
   if (events.type === "loading") {
     return (
@@ -25,7 +30,7 @@ export function EventsPage() {
         </tr>
       </thead>
       <tbody>
-        {events.events.map(event => (
+        {events.value.map(event => (
           <tr key={event.identifier}>
             <td>{event.identifier}</td>
             <td>{event.type === "USER_CREATED" ? "User created" : event.type === "USER_UPDATED" ? "User updated" : "Unknown"}</td>
