@@ -16,10 +16,17 @@ export class CorruptionError extends Error {
 
 export type Replay<State, Event> = (events: Event[]) => State
 
+export type Subscriber = () => void;
+
+export type UnsubscribeFunction = () => void
+
+export type SubscribeFunction = (subscriber: Subscriber) => UnsubscribeFunction
+
 export interface EventStore<State, Event> {
   readonly saveEvent: (event: Event) => Promise<void>;
   readonly getEvents: () => Promise<Event[] | CorruptionError>;
   readonly getState: () => Promise<State | CorruptionError>
+  readonly subscribe: SubscribeFunction
 }
 
 export type ReleaseLockFunction = () => void;
@@ -30,15 +37,21 @@ export interface Adapter<Event> {
   readonly requestLock: () => Promise<ReleaseLockFunction>
 }
 
-export interface CreateEventDatabaseOptions<State, Event> {
+export interface CreateEventStoreOptions<State, Event> {
   readonly parser: (event: unknown) => Event | Error,
   readonly adapter: Adapter<Event>,
   readonly replay: Replay<State, Event>
 }
 
-export function createEventStore<State, Event extends EventShape>(options: CreateEventDatabaseOptions<State, Event>): EventStore<State, Event> {
+export function createEventStore<State, Event extends EventShape>(options: CreateEventStoreOptions<State, Event>): EventStore<State, Event> {
+  const subscribers: Subscriber[] = [];
+
   async function saveEvent(event: Event): Promise<void> {
     await options.adapter.save(event);
+
+    subscribers.forEach(notify => {
+      notify();
+    });
   }
 
   async function getState(): Promise<State | CorruptionError> {
@@ -70,9 +83,24 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
     return events;
   }
 
+  function subscribe(newSubscriber: Subscriber): UnsubscribeFunction {
+    subscribers.push(newSubscriber);
+
+    return () => {
+      const subscriberIndex = subscribers.findIndex(subscriber => {
+        return subscriber === newSubscriber;
+      });
+
+      if (subscriberIndex !== -1) {
+        subscribers.splice(subscriberIndex, 1);
+      }
+    }
+  }
+
   return {
     saveEvent,
     getState,
-    getEvents
+    getEvents,
+    subscribe
   }
 }
