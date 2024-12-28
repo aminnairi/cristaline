@@ -15,15 +15,18 @@ npm install @aminnairi/eventstore
 
 ## Adapter installation
 
-You'll need an adapter, whether it is one that is included in this library like [`WebStorageAdapter`](../web/storage) or [`JsonStreamAdapter`](../node/jsonstream) or your own in order to use this library.
+You'll need an adapter, whether it is one that is included in this library or your own in order to use this library.
 
-```bash
-npm install @aminnairi/eventstore-web-storage
-# or
-npm install @aminnairi/eventstore-node-json-stream
-```
+See below for a list of available adapters
 
-See [`packages`](../../packages) for a list of packages available.
+## Packages
+
+Package | Type | Description
+---|---|---
+`@aminnairi/eventstore` | Core Library | An immutable database engine built on the Event Sourcing pattern.
+`@aminnairi/eventstore-web-storage` | Adapter | Web Storage API adapter for `@aminnairi/eventstore`
+`@aminnairi/eventstore-node-json-stream` | Adapter | Node.js File API with JSON Stream adapter for `@aminnairi/eventstore`
+`@aminnairi/eventstore-react` | Framework Bridge | React Hook for `@aminnairi/eventstore`
 
 ## Usage
 
