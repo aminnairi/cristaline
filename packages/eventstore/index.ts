@@ -24,9 +24,9 @@ export type SubscribeFunction = (subscriber: Subscriber) => UnsubscribeFunction
 
 export interface EventStore<State, Event> {
   readonly saveEvent: (event: Event) => Promise<void>;
-  readonly subscribe: SubscribeFunction
   readonly getEvents: () => ReadonlyArray<Event>;
   readonly getState: () => Readonly<State>;
+  readonly subscribe: SubscribeFunction;
   readonly initialize: InitializeFunction;
 }
 
@@ -45,7 +45,7 @@ export interface CreateEventStoreOptions<State, Event> {
   readonly state: State,
   readonly parser: EventStoreParser<Event>,
   readonly adapter: Adapter<Event>,
-  readonly replay: Replay<State, Event>
+  readonly replay: Replay<State, Event>,
 }
 
 export function createEventStore<State, Event extends EventShape>(options: CreateEventStoreOptions<State, Event>): EventStore<State, Event> {
@@ -53,10 +53,12 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
 
   let state: State = options.state;
   let events: ReadonlyArray<Event> = [];
+
   async function saveEvent(event: Event): Promise<void> {
     await options.adapter.save(event);
 
     state = options.replay(state, event);
+
     subscribers.forEach(notify => {
       notify();
     });
@@ -112,7 +114,7 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
     saveEvent,
     getState,
     getEvents,
-    subscribe
+    subscribe,
     initialize
   }
 }
