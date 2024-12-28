@@ -1,7 +1,10 @@
 {
   "private": true,
-  "workspace": [
-    "example",
-    "package"
+  "workspaces": [
+    "packages/eventstore",
+    "packages/node/jsonstream",
+    "packages/web/storage",
+    "examples/node",
+    "examples/react"
   ]
 }
