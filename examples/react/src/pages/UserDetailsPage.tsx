@@ -3,7 +3,7 @@ import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } fro
 import { useEventStore } from "../eventstore";
 
 export function UserDetailsPage() {
-  const { state, saveEvent, fetchState } = useEventStore();
+  const { state, saveEvent } = useEventStore();
   const params = useParams();
   const userId = useMemo(() => params["userId"], [params]);
   const [email, setEmail] = useState("");
@@ -40,10 +40,6 @@ export function UserDetailsPage() {
       }
     });
   }, [userId, saveEvent, email]);
-
-  useEffect(() => {
-    fetchState();
-  }, [fetchState]);
 
   useEffect(() => {
     if (user) {

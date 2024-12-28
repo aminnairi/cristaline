@@ -1,12 +1,7 @@
-import { useEffect } from "react";
 import { useEventStore } from "../eventstore";
 
 export function EventsPage() {
-  const { events, fetchEvents } = useEventStore();
-
-  useEffect(() => {
-    fetchEvents()
-  }, [fetchEvents]);
+  const { events } = useEventStore();
 
   if (events.type === "loading") {
     return (

@@ -1,9 +1,9 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { Link } from "react-router";
 import { useEventStore } from "../eventstore";
 
 export function HomePage() {
-  const { state, saveEvent, fetchState } = useEventStore();
+  const { state, saveEvent } = useEventStore();
 
   const addUser = useCallback(() => {
     saveEvent({
@@ -17,10 +17,6 @@ export function HomePage() {
       }
     })
   }, [saveEvent]);
-
-  useEffect(() => {
-    fetchState();
-  }, [fetchState]);
 
   if (state.type === "loading") {
     return (
