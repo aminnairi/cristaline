@@ -2,7 +2,7 @@ import { Adapter, ReleaseLockFunction } from "../../eventstore/index.ts";
 
 export interface WebStorageAdapterOptions {
   storage: Storage,
-  eventsKey: string
+  key: string
 }
 
 export class WebStorageAdapter<Event> implements Adapter<Event> {
@@ -24,7 +24,7 @@ export class WebStorageAdapter<Event> implements Adapter<Event> {
     return releaseLock;
   }
 
-  public static for<Event>({ storage, eventsKey }: WebStorageAdapterOptions): WebStorageAdapter<Event> {
+  public static for<Event>({ storage, key: eventsKey }: WebStorageAdapterOptions): WebStorageAdapter<Event> {
     return new WebStorageAdapter(storage, eventsKey);
   }
 
