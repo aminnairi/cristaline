@@ -37,8 +37,9 @@ export interface Adapter<Event> {
   readonly requestLock: () => Promise<ReleaseLockFunction>
 }
 
+export type EventStoreParser<Event> = (event: unknown) => Event | Error
 export interface CreateEventStoreOptions<State, Event> {
-  readonly parser: (event: unknown) => Event | Error,
+  readonly parser: EventStoreParser<Event>,
   readonly adapter: Adapter<Event>,
   readonly replay: Replay<State, Event>
 }
