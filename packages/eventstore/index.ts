@@ -23,7 +23,7 @@ export type UnsubscribeFunction = () => void
 export type SubscribeFunction = (subscriber: Subscriber) => UnsubscribeFunction
 
 export interface EventStore<State, Event> {
-  readonly saveEvent: (event: Event) => Promise<void>;
+  readonly saveEvent: (event: Event) => Promise<null | Error>;
   readonly getEvents: () => ReadonlyArray<Event>;
   readonly getState: () => Readonly<State>;
   readonly subscribe: SubscribeFunction;
@@ -55,38 +55,58 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
   let state: State = options.state;
   let events: ReadonlyArray<Event> = [];
 
-  async function saveEvent(event: Event): Promise<void> {
-    await options.adapter.save(event);
+  async function saveEvent(event: Event): Promise<null | Error> {
+    const releaseLock = await options.adapter.requestLock();
 
-    state = options.replay(state, event);
+    try {
 
-    subscribers.forEach(notify => {
-      notify();
-    });
+      await options.adapter.save(event);
+
+      state = options.replay(state, event);
+
+      subscribers.forEach(notify => {
+        notify();
+      });
+
+      return null;
+    } catch (error) {
+      return error instanceof Error ? error : new Error(String(error));
+    } finally {
+      releaseLock();
+    }
   }
 
   async function initialize(): Promise<null | CorruptionError> {
-    const receivedEvents: unknown[] = await options.adapter.retrieve();
-    const parsedEvents: Event[] = [];
+    const releaseLock = await options.adapter.requestLock();
 
-    if (receivedEvents instanceof Error) {
-      return new CorruptionError([receivedEvents]);
-    }
+    try {
+      const receivedEvents: unknown[] = await options.adapter.retrieve();
+      const parsedEvents: Event[] = [];
 
-    for (const event of receivedEvents) {
-      const parsedEvent = options.parser(event);
-
-      if (parsedEvent instanceof Error) {
-        return new CorruptionError([parsedEvent]);
+      if (receivedEvents instanceof Error) {
+        return new CorruptionError([receivedEvents]);
       }
 
-      parsedEvents.push(parsedEvent);
-      state = options.replay(state, parsedEvent);
+      for (const event of receivedEvents) {
+        const parsedEvent = options.parser(event);
+
+        if (parsedEvent instanceof Error) {
+          return new CorruptionError([parsedEvent]);
+        }
+
+        parsedEvents.push(parsedEvent);
+        state = options.replay(state, parsedEvent);
+      }
+
+      events = parsedEvents;
+
+      return null;
+
+    } catch (error) {
+      return error instanceof Error ? new CorruptionError([error]) : new CorruptionError([new Error(String(error))]);
+    } finally {
+      releaseLock();
     }
-
-    events = parsedEvents;
-
-    return null;
   }
 
   function getState(): Readonly<State> {
