@@ -4,6 +4,7 @@
     "packages/eventstore",
     "packages/node/json-stream",
     "packages/web/storage",
+    "packages/react",
     "examples/node",
     "examples/react"
   ]
