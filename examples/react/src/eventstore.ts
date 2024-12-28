@@ -1,6 +1,7 @@
 import { defineEventStore } from "@aminnairi/evenstore-react"
+import { EventShape } from "@aminnairi/eventstore";
 import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
-import { z } from "zod"
+import { z, ZodSchema } from "zod"
 
 const eventSchema = z.union([
   z.object({
@@ -12,7 +13,7 @@ const eventSchema = z.union([
       id: z.string(),
       email: z.string()
     })
-  }),
+  }) satisfies ZodSchema<EventShape>,
   z.object({
     type: z.literal("USER_UPDATED"),
     version: z.literal(1),
@@ -22,7 +23,7 @@ const eventSchema = z.union([
       id: z.string().uuid(),
       email: z.string().email()
     })
-  })
+  }) satisfies ZodSchema<EventShape>
 ])
 
 type Event = z.infer<typeof eventSchema>
