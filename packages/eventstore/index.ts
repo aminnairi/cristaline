@@ -27,6 +27,7 @@ export interface EventStore<State, Event> {
   readonly subscribe: SubscribeFunction
   readonly getEvents: () => ReadonlyArray<Event>;
   readonly getState: () => Readonly<State>;
+  readonly initialize: InitializeFunction;
 }
 
 export type ReleaseLockFunction = () => void;
@@ -39,6 +40,7 @@ export interface Adapter<Event> {
 
 export type EventStoreParser<Event> = (event: unknown) => Event | Error
 
+export type InitializeFunction = () => Promise<null | CorruptionError>
 export interface CreateEventStoreOptions<State, Event> {
   readonly state: State,
   readonly parser: EventStoreParser<Event>,
@@ -60,14 +62,29 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
     });
   }
 
+  async function initialize(): Promise<null | CorruptionError> {
+    const receivedEvents: unknown[] = await options.adapter.retrieve();
+    const parsedEvents: Event[] = [];
 
+    if (receivedEvents instanceof Error) {
+      return new CorruptionError([receivedEvents]);
     }
 
+    for (const event of receivedEvents) {
+      const parsedEvent = options.parser(event);
 
       if (parsedEvent instanceof Error) {
+        return new CorruptionError([parsedEvent]);
+      }
 
+      parsedEvents.push(parsedEvent);
+      state = options.replay(state, parsedEvent);
+    }
 
+    events = parsedEvents;
 
+    return null;
+  }
 
   function getState(): Readonly<State> {
     return state;
@@ -96,5 +113,6 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
     getState,
     getEvents,
     subscribe
+    initialize
   }
 }
