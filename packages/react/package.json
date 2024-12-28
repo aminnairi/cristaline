@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "@aminnairi/evenstore-react",
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  }
+}
