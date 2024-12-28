@@ -1,7 +1,6 @@
-import { EventShape, EventStoreParser, Replay } from "@aminnairi/eventstore";
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import { Adapter, EventShape, EventStoreParser, Replay } from "@aminnairi/eventstore";
+import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { createEventStore } from "@aminnairi/eventstore";
-import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
 
 export interface EventStoreContextInterface<State, Event extends EventShape> {
   state: TransientState<Readonly<State>>,
@@ -17,6 +16,7 @@ export interface EventStoreProviderProps {
 export interface DefineStoreOptions<State, Event> {
   state: State,
   parser: EventStoreParser<Event>,
+  adapter: Adapter<Event>,
   replay: Replay<State, Event>
 }
 
@@ -49,10 +49,7 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
   });
 
   const eventStore = createEventStore<State, Event>({
-    adapter: WebStorageAdapter.for({
-      eventsKey: "events",
-      storage: localStorage
-    }),
+    adapter: options.adapter,
     parser: options.parser,
     replay: options.replay,
     state: options.state

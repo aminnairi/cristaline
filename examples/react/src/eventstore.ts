@@ -1,4 +1,5 @@
 import { defineEventStore } from "@aminnairi/evenstore-react"
+import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
 import { z } from "zod"
 
 const eventSchema = z.union([
@@ -36,10 +37,14 @@ type State = {
 }
 
 export const { EventStoreProvider, useEventStore } = defineEventStore<State, Event>({
+  parser: eventSchema.parse,
   state: {
     users: []
   },
-  parser: eventSchema.parse,
+  adapter: WebStorageAdapter.for({
+    eventsKey: "events",
+    storage: localStorage
+  }),
   replay: (state, event) => {
     switch (event.type) {
       case "USER_CREATED":
