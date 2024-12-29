@@ -1,7 +1,7 @@
 {
   "private": true,
   "type": "module",
-  "name": "@aminnairi/eventstore-example-node",
+  "name": "@cristaline/example-node",
   "scripts": {
     "start": "tsx index.ts"
   },

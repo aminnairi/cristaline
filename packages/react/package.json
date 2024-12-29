@@ -1,7 +1,7 @@
 {
   "private": true,
   "type": "module",
-  "name": "@aminnairi/evenstore-react",
+  "name": "@cristaline/react",
   "peerDependencies": {
     "react": ">=18.0.0"
   }
