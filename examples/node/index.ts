@@ -43,42 +43,38 @@ type State = z.infer<typeof stateSchema>
 
 type Event = z.infer<typeof eventSchema>;
 
-const { saveEvent, getState } = await createEventStore<State, Event>({
-  parser: event => {
-    return eventSchema.parse(event);
-  },
+const { saveEvent, getState } = createEventStore<State, Event>({
+  parser: eventSchema.parse,
   adapter: NodeJsonStreamAdapter.for({
     path: "database.jsonl",
-    eventSchema,
-    stateSchema
   }),
-  replay: events => {
-    const state: State = {
-      users: []
+  state: {
+    users: []
+  },
+  replay: (state, event) => {
+    switch (event.type) {
+      case "USER_CREATED":
+        return {
+          ...state,
+          users: [
+            ...state.users,
+            {
+              createdAt: event.data.createdAt,
+              email: event.data.email,
+              identifier: event.data.identifier,
+              updatedAt: event.data.updatedAt,
+            },
+          ]
+        }
+
+      case "USER_DELETED":
+        return {
+          ...state,
+          users: state.users.filter(user => {
+            return user.identifier !== event.data.identifier
+          })
+        };
     }
-
-    for (const event of events) {
-      switch (event.type) {
-        case "USER_CREATED":
-          state.users.push({
-            createdAt: event.data.createdAt,
-            email: event.data.email,
-            identifier: event.data.identifier,
-            updatedAt: event.data.updatedAt
-          });
-
-        case "USER_DELETED":
-          const userIndex = state.users.findIndex(user => {
-            return user.identifier === event.data.identifier
-          });
-
-          if (userIndex) {
-            state.users.splice(userIndex, 1);
-          }
-      }
-    }
-
-    return state;
   }
 });
 
@@ -103,10 +99,6 @@ await Promise.all(Array.from(Array(10)).map(async (_, index) => {
   console.log("Saving event done.");
 }));
 
-const state = await getState();
+const state = getState();
 
-if (state instanceof Error) {
-  console.error(state.errors.join(", "));
-} else {
-  console.log(`Found ${state.users.length} users in database.`);
-}
+console.log(state);
