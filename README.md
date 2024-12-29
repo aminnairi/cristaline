@@ -21,16 +21,22 @@ See below for a list of available adapters
 
 ## Packages
 
-Package | Type | Description
----|---|---
-`@aminnairi/eventstore` | Core Library | An immutable database engine built on the Event Sourcing pattern.
-`@aminnairi/eventstore-web-storage` | Adapter | Web Storage API adapter for `@aminnairi/eventstore`
-`@aminnairi/eventstore-node-json-stream` | Adapter | Node.js File API with JSON Stream adapter for `@aminnairi/eventstore`
-`@aminnairi/eventstore-react` | Framework Bridge | React Hook for `@aminnairi/eventstore`
+- [`@aminnairi/eventstore`](#aminnairieventstore)
+- [`@aminnairi/eventstore-web-storage`](#aminnairieventstore-web-storage)
+- [`@aminnairi/eventstore-node-json-stream`](#aminnairieventstore-node-json-stream)
+- [`@aminnairi/eventstore-react`](#aminnairieventstore-react)
 
 See [`examples`](../../examples/) for a more detailed list of examples about how to use these libraries.
 
 ## @aminnairi/eventstore
+
+Create a database based on the Event Sourcing pattern.
+
+### Installation
+
+```bash
+npm install @aminnairi/eventstore
+```
 
 ### createEventStore
 
@@ -202,6 +208,12 @@ eventStore.subscribe(() => {
 
 Adapter for working with `@aminnairi/eventstore` using Node.js with the File API and JSON streams.
 
+### Installation
+
+```bash
+npm install @aminnairi/eventstore-node-json-stream
+```
+
 ### NodeJsonStreamAdapter.for
 
 This method allows for creating a new adapter for creating an event store.
@@ -268,6 +280,12 @@ const eventStore = createEventStore<State, Event>({
 
 Adapter for working with the Web Storage API using JSON streams.
 
+### Installation
+
+```bash
+npm install @aminnairi/eventstore-web-storage
+```
+
 ### WebStorageAdapter.for
 
 This method allows for creating a new adapter for creating an event store.
@@ -332,6 +350,12 @@ const eventStore = createEventStore<State, Event>({
 ## @aminnairi/eventstore-react
 
 Bridge for working with `@aminnairi/eventstore` in a `react` application.
+
+### Installation
+
+```bash
+npm install @aminnairi/eventstore-react
+```
 
 ### defineEventStore
 
@@ -419,6 +443,14 @@ export const { EventStoreProvider, useEventStore } = defineEventStore<State, Eve
 });
 ```
 
+### EventStoreProvider
+
+React component used for initializing the event store.
+
+This is required if you want to use the `useEventStore` hook.
+
+#### Example
+
 ```tsx
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
@@ -436,6 +468,12 @@ createRoot(rootElement).render(
   </EventStoreProvider>
 );
 ```
+
+### useEventStore
+
+React hook used to access the functions exposed from an event store.
+
+#### Example
 
 ```tsx
 import { useCallback } from "react";
