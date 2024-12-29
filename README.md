@@ -34,6 +34,8 @@ See [`examples`](../../examples/) for a more detailed list of examples about how
 
 ### createEventStore
 
+Create the shape of the event, and how to create a projection from those events.
+
 #### Example
 
 > [!NOTE]
@@ -117,6 +119,10 @@ const eventStore = createEventStore<State, Event>({
 
 ### initialize
 
+This function lets you initialize the state and events that are stored and retrieved from the storage system and mounts them in memory to increase their access.
+
+You'll need to run this method in order to get the initial state of your events.
+
 #### Example
 
 ```typescript
@@ -131,6 +137,8 @@ if (error instanceof Error) {
 
 ### getEvents
 
+This is a simple getter for accessing the events log as an array.
+
 #### Example
 
 ```typescript
@@ -143,6 +151,8 @@ for (const event of events) {
 
 ### getState
 
+This is also a getter method that will get you the actual state of your application computed from your events log.
+
 ```typescript
 const state = eventStore.getState();
 
@@ -152,6 +162,10 @@ for (const user of state.users) {
 ```
 
 ### saveEvent
+
+This method will allow you to save an event directly to your storage system.
+
+It also add this event to the list of events mounted in memory, as well as computing again the state of your application.
 
 #### Example
 
@@ -175,6 +189,8 @@ if (error instanceof Error) {
 ```
 
 ### subscribe
+
+This method will help you react to any change in your event store whenever an event has been added.
 
 ```typescript
 eventStore.subscribe(() => {
