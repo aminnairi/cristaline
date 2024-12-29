@@ -45,7 +45,7 @@ export function HomePage() {
       <table>
         <tbody>
           {state.value.users.map(user => (
-            <tr key={user.email}>
+            <tr key={user.id}>
               <td>
                 <Link to={`/users/${user.id}`}>{user.email}</Link>
               </td>
