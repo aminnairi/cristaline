@@ -1,6 +1,7 @@
 {
   "type": "module",
   "name": "@cristaline/node-json-stream",
+  "description": "Node.js File API adapter based on the JSON stream format.",
   "version": "0.1.0",
   "main": "index.ts",
   "devDependencies": {

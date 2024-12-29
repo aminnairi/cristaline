@@ -2,4 +2,5 @@
   "type": "module",
   "name": "@cristaline/web-storage",
   "version": "0.1.0"
+  "description": "Web Storage API adapter based on the JSON stream format.",
 }

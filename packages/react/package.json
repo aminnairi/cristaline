@@ -2,6 +2,7 @@
   "private": true,
   "type": "module",
   "name": "@cristaline/react",
+  "description": "React.js bridge for cristaline.",
   "peerDependencies": {
     "react": ">=18.0.0"
   }
