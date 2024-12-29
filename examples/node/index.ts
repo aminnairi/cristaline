@@ -1,6 +1,6 @@
 import { createEventStore } from "@cristaline/core";
 import { z } from "zod";
-import { NodeJsonStreamAdapter } from "@aminnairi/eventstore-node-json-stream";
+import { NodeJsonStreamAdapter } from "@cristaline/node-json-stream";
 
 const stateSchema = z.object({
   users: z.array(z.object({
