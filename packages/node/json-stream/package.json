@@ -3,7 +3,7 @@
   "name": "@cristaline/node-json-stream",
   "version": "0.1.0",
   "main": "index.ts",
-  "dependencies": {
-    "zod": "^3.24.1"
+  "devDependencies": {
+    "@types/node": "^22.10.2"
   }
 }
