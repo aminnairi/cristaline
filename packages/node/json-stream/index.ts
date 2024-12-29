@@ -1,11 +1,8 @@
-import { ZodSchema } from "zod";
 import { Adapter, ReleaseLockFunction } from "@aminnairi/eventstore";
 import { appendFile, readFile, stat, writeFile } from "node:fs/promises";
 
 export interface NodeJsonStreamAdapterOptions {
   readonly path: string,
-  readonly eventSchema: ZodSchema,
-  readonly stateSchema: ZodSchema
 }
 
 export function createLock() {
