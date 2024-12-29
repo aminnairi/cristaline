@@ -198,6 +198,287 @@ eventStore.subscribe(() => {
 });
 ```
 
+## @aminnairi/eventstore-node-json-stream
+
+Adapter for working with `@aminnairi/eventstore` using Node.js with the File API and JSON streams.
+
+### NodeJsonStreamAdapter.for
+
+#### Example
+
+```typescript
+import { EventShape, createEventStore } from "@aminnairi/eventstore";
+import { NodeJsonStreamAdapter } from "@aminnairi/eventstore-node-json-stream";
+import { ZodSchema, z } from "zod";
+
+const eventSchema = z.object({
+  type: z.literal("USER_CREATED"),
+  identifier: z.string(),
+  version: z.literal(1),
+  date: z.date({ coerce: true }),
+  data: z.object({
+    id: z.string(),
+    email: z.string()
+  }),
+}) satisfies ZodSchema<EventShape>;
+
+type Event = z.infer<typeof eventSchema>;
+
+type User = {
+  id: string,
+  email: string
+}
+
+type State = {
+  users: Array<User>
+}
+
+const eventStore = createEventStore<State, Event>({
+  parser: eventSchema.parse,
+  adapter: NodeJsonStreamAdapter.for({
+    path: "events.jsonl"
+  }),
+  initialState: {
+    users: []
+  },
+  replay: (state, event) => {
+    switch (event.type) {
+      case "USER_CREATED":
+        return {
+          ...state,
+          users: [
+            ...state.users,
+            {
+              id: event.data.id,
+              email: event.data.email
+            },
+          ],
+        };
+    }
+  },
+});
+```
+
+## @aminnairi/eventstore-web-storage
+
+Adapter for working with the Web Storage API using JSON streams.
+
+### WebStorageAdapter.for
+
+```typescript
+import { EventShape, createEventStore } from "@aminnairi/eventstore";
+import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
+import { ZodSchema, z } from "zod";
+
+const eventSchema = z.object({
+  type: z.literal("USER_CREATED"),
+  identifier: z.string(),
+  version: z.literal(1),
+  date: z.date({ coerce: true }),
+  data: z.object({
+    id: z.string(),
+    email: z.string()
+  }),
+}) satisfies ZodSchema<EventShape>;
+
+type Event = z.infer<typeof eventSchema>;
+
+type User = {
+  id: string,
+  email: string
+}
+
+type State = {
+  users: Array<User>
+}
+
+const eventStore = createEventStore<State, Event>({
+  parser: eventSchema.parse,
+  adapter: WebStorageAdapter.for({
+    key: "events",
+    storage: window.localStorage
+  }),
+  initialState: {
+    users: []
+  },
+  replay: (state, event) => {
+    switch (event.type) {
+      case "USER_CREATED":
+        return {
+          ...state,
+          users: [
+            ...state.users,
+            {
+              id: event.data.id,
+              email: event.data.email
+            },
+          ],
+        };
+    }
+  },
+});
+```
+
+## @aminnairi/eventstore-react
+
+```typescript
+import { defineEventStore } from "@aminnairi/evenstore-react"
+import { EventShape } from "@aminnairi/eventstore";
+import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
+import { z, ZodSchema } from "zod"
+
+const eventSchema = z.union([
+  z.object({
+    type: z.literal("USER_CREATED"),
+    version: z.literal(1),
+    identifier: z.string(),
+    date: z.date({ coerce: true }),
+    data: z.object({
+      id: z.string(),
+      email: z.string()
+    })
+  }) satisfies ZodSchema<EventShape>,
+  z.object({
+    type: z.literal("USER_UPDATED"),
+    version: z.literal(1),
+    identifier: z.string().uuid(),
+    date: z.date({ coerce: true }),
+    data: z.object({
+      id: z.string().uuid(),
+      email: z.string().email()
+    })
+  }) satisfies ZodSchema<EventShape>
+])
+
+type Event = z.infer<typeof eventSchema>
+
+type User = {
+  id: string,
+  email: string
+}
+
+type State = {
+  users: User[]
+}
+
+export const { EventStoreProvider, useEventStore } = defineEventStore<State, Event>({
+  parser: eventSchema.parse,
+  state: {
+    users: []
+  },
+  adapter: WebStorageAdapter.for({
+    key: "events",
+    storage: localStorage
+  }),
+  replay: (state, event) => {
+    switch (event.type) {
+      case "USER_CREATED":
+        return {
+          ...state,
+          users: [
+            ...state.users,
+            event.data
+          ]
+        }
+
+      case "USER_UPDATED":
+        return {
+          ...state,
+          users: state.users.map(user => {
+            if (user.id !== event.data.id) {
+              return user;
+            }
+
+            return {
+              ...user,
+              ...event.data
+            }
+          })
+        }
+    }
+  }
+});
+```
+
+```tsx
+import { createRoot } from 'react-dom/client'
+import App from './App.tsx'
+import { EventStoreProvider } from './eventstore'
+
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error("Root element not found.");
+}
+
+createRoot(rootElement).render(
+  <EventStoreProvider>
+    <App />
+  </EventStoreProvider>
+);
+```
+
+```tsx
+import { useCallback } from "react";
+import { Link } from "react-router";
+import { useEventStore } from "../eventstore";
+
+export function HomePage() {
+  const { state, saveEvent } = useEventStore();
+
+  const addUser = useCallback(() => {
+    saveEvent({
+      type: "USER_CREATED",
+      version: 1,
+      identifier: crypto.randomUUID(),
+      date: new Date(),
+      data: {
+        id: crypto.randomUUID(),
+        email: `${crypto.randomUUID()}@gmail.com`
+      }
+    })
+  }, [saveEvent]);
+
+  if (state.type === "loading") {
+    return (
+      <h1>Loading</h1>
+    );
+  }
+
+  if (state.type === "issue") {
+    return (
+      <div>
+        <h1>Error</h1>
+        <pre>
+          <code>
+            {state.error.message}
+          </code>
+        </pre>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <button onClick={addUser}>
+        Add user
+      </button>
+      <table>
+        <tbody>
+          {state.value.users.map(user => (
+            <tr key={user.id}>
+              <td>
+                <Link to={`/users/${user.id}`}>{user.email}</Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+```
+
 ## What Is `@aminnairi/eventstore`
 
 `@aminnairi/eventstore` is a library designed to implement the Event Sourcing pattern.
