@@ -1,6 +1,6 @@
 import { defineEventStore } from "@aminnairi/evenstore-react"
-import { EventShape } from "@aminnairi/eventstore";
 import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
+import { EventShape } from "@cristaline/core";
 import { z, ZodSchema } from "zod"
 
 const eventSchema = z.union([

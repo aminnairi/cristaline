@@ -1,4 +1,4 @@
-import { Adapter, ReleaseLockFunction } from "../../eventstore/index.ts";
+import { Adapter, ReleaseLockFunction } from "@cristaline/core";
 
 export interface WebStorageAdapterOptions {
   storage: Storage,

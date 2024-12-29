@@ -1,4 +1,4 @@
-import { createEventStore } from "@aminnairi/eventstore";
+import { createEventStore } from "@cristaline/core";
 import { z } from "zod";
 import { NodeJsonStreamAdapter } from "@aminnairi/eventstore-node-json-stream";
 

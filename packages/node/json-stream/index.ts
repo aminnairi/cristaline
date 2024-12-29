@@ -1,4 +1,4 @@
-import { Adapter, ReleaseLockFunction } from "@aminnairi/eventstore";
+import { Adapter, ReleaseLockFunction } from "@cristaline/core";
 import { appendFile, readFile, stat, writeFile } from "node:fs/promises";
 
 export interface NodeJsonStreamAdapterOptions {
