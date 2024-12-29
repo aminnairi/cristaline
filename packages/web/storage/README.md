@@ -28,158 +28,16 @@ Package | Type | Description
 `@aminnairi/eventstore-node-json-stream` | Adapter | Node.js File API with JSON Stream adapter for `@aminnairi/eventstore`
 `@aminnairi/eventstore-react` | Framework Bridge | React Hook for `@aminnairi/eventstore`
 
-## Usage
-
-Here is an example usage of this library in the context of a Web application.
-
-> [!NOTE]
-> We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
-
-```typescript
-import { EventShape, createEventStore } from "@aminnairi/eventstore"
-import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage"
-import { ZodSchema, z } from "zod";
-
-const eventSchema = z.union([
-  z.object({
-    type: z.literal("USER_CREATED"),
-    version: z.literal(1),
-    identifier: z.string(),
-    date: z.date({ coerce: true }),
-    data: z.object({
-      id: z.string(),
-      email: z.string()
-    })
-  }) satisfies ZodSchema<EventShape>,
-  z.object({
-    type: z.literal("USER_UPDATED"),
-    version: z.literal(1),
-    identifier: z.string().uuid(),
-    date: z.date({ coerce: true }),
-    data: z.object({
-      id: z.string().uuid(),
-      email: z.string().email()
-    })
-  }) satisfies ZodSchema<EventShape>
-])
-
-type Event = z.infer<typeof eventSchema>
-
-interface User {
-  id: string,
-  email: string
-}
-
-type State = {
-  users: User[]
-}
-
-const eventStore = createEventStore<State, Event>({
-  initialState: {
-    type: "state",
-    users: []
-  },
-  parser: event => {
-    return eventSchema.parse(event);
-  },
-  adapter: WebStorageAdapter.for({
-    storage: localStorage,
-    eventsKey: "events",
-  }),
-  replay: (events) => {
-    const state: State = {
-      users: []
-    }
-
-    for (const event of events) {
-      if (event.type === "USER_CREATED") {
-        state.users.push({
-          id: event.data.id,
-          email: event.data.email
-        });
-
-        continue;
-      }
-
-      if (event.type === "USER_UPDATED") {
-        const userIndex = state.users.findIndex(user => {
-          return user.id === event.data.id
-        });
-
-        if (userIndex !== -1) {
-          state.users.splice(userIndex, 1, {
-            id: event.data.id,
-            email: event.data.email
-          });
-        }
-
-        continue;
-      }
-    }
-
-    return state;
-  }
-});
-
-await eventStore.saveEvent({
-  type: "USER_CREATED",
-  version: 1,
-  identifier: crypto.randomUUID(),
-  date: new Date(),
-  data: {
-    id: crypto.randomUUID(),
-    email: "first@app.com"
-  }
-});
-
-const secondUserId = crypto.randomUUID();
-
-await eventStore.saveEvent({
-  type: "USER_CREATED",
-  version: 1,
-  identifier: crypto.randomUUID(),
-  date: new Date(),
-  data: {
-    id: secondUserId,
-    email: "second@app.com"
-  }
-});
-
-await eventStore.saveEvent({
-  type: "USER_UPDATED",
-  version: 1,
-  identifier: crypto.randomUUID(),
-  date: new Date(),
-  data: {
-    id: secondUserId,
-    email: "second@app.io"
-  }
-});
-
-const state = await eventStore.getState();
-
-if (state instanceof Error) {
-  console.error("Corrupted database");
-} else {
-  console.log(`There is currently ${state.users.length} users in state.`);
-}
-
-const events = eventStore.getEvents();
-
-if (events instanceof Error) {
-  console.error("Corrupted database");
-} else {
-  console.log(`There is currently ${events.length} events in store.`);
-}
-```
-
-See [`examples`](../../examples/) for a more detailed list of examples.
+See [`examples`](../../examples/) for a more detailed list of examples about how to use these libraries.
 
 ## @aminnairi/eventstore
 
 ### createEventStore
 
 #### Example
+
+> [!NOTE]
+> We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
 
 ```typescript
 import { EventShape, createEventStore } from "@aminnairi/eventstore";
