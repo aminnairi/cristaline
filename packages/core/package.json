@@ -3,7 +3,6 @@
   "name": "@cristaline/core",
   "description": "An immutable database engine built on the Event Sourcing pattern.",
   "version": "0.1.0",
-  "main": "index.ts",
   "devDependencies": {
     "@types/node": "^22.10.2"
   }
