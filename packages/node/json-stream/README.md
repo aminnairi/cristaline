@@ -204,7 +204,12 @@ Adapter for working with `@aminnairi/eventstore` using Node.js with the File API
 
 ### NodeJsonStreamAdapter.for
 
+This method allows for creating a new adapter for creating an event store.
+
 #### Example
+
+> [!NOTE]
+> We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
 
 ```typescript
 import { EventShape, createEventStore } from "@aminnairi/eventstore";
@@ -265,6 +270,11 @@ Adapter for working with the Web Storage API using JSON streams.
 
 ### WebStorageAdapter.for
 
+This method allows for creating a new adapter for creating an event store.
+
+> [!NOTE]
+> We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
+
 ```typescript
 import { EventShape, createEventStore } from "@aminnairi/eventstore";
 import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
@@ -320,6 +330,15 @@ const eventStore = createEventStore<State, Event>({
 ```
 
 ## @aminnairi/eventstore-react
+
+Bridge for working with `@aminnairi/eventstore` in a `react` application.
+
+### defineEventStore
+
+Define the event store for a React application.
+
+> [!NOTE]
+> We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
 
 ```typescript
 import { defineEventStore } from "@aminnairi/evenstore-react"
