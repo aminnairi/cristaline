@@ -1,5 +1,5 @@
-import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { Adapter, EventShape, EventStoreParser, Replay, createEventStore } from "@cristaline/core";
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 
 export interface EventStoreContextInterface<State, Event extends EventShape> {
   state: TransientState<Readonly<State>>,
