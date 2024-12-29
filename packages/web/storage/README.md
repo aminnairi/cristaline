@@ -1,4 +1,4 @@
-# @aminnairi/eventstore
+# cristaline
 
 An immutable database engine built on the Event Sourcing pattern.
 
@@ -10,7 +10,7 @@ An immutable database engine built on the Event Sourcing pattern.
 ## Installation
 
 ```bash
-npm install @aminnairi/eventstore
+npm install @cristaline/core
 ```
 
 ## Adapter installation
@@ -21,21 +21,21 @@ See below for a list of available adapters
 
 ## Packages
 
-- [`@aminnairi/eventstore`](#aminnairieventstore)
-- [`@aminnairi/eventstore-web-storage`](#aminnairieventstore-web-storage)
-- [`@aminnairi/eventstore-node-json-stream`](#aminnairieventstore-node-json-stream)
-- [`@aminnairi/eventstore-react`](#aminnairieventstore-react)
+- [`@cristaline/core`](#cristalinecore)
+- [`@cristaline/web-storage`](#cristalineweb-storage)
+- [`@cristaline/node-json-stream`](#cristalinenode-json-stream)
+- [`@cristaline/react`](#cristalinereact)
 
 See [`examples`](../../examples/) for a more detailed list of examples about how to use these libraries.
 
-## @aminnairi/eventstore
+## @cristaline/core
 
 Create a database based on the Event Sourcing pattern.
 
 ### Installation
 
 ```bash
-npm install @aminnairi/eventstore
+npm install @cristaline/core
 ```
 
 ### createEventStore
@@ -48,7 +48,7 @@ Create the shape of the event, and how to create a projection from those events.
 > We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
 
 ```typescript
-import { EventShape, createEventStore } from "@aminnairi/eventstore";
+import { EventShape, createEventStore } from "@cristaline/core";
 import { ZodSchema, z } from "zod";
 
 const eventSchema = z.union([
@@ -204,14 +204,14 @@ eventStore.subscribe(() => {
 });
 ```
 
-## @aminnairi/eventstore-node-json-stream
+## @cristaline/node-json-stream
 
-Adapter for working with `@aminnairi/eventstore` using Node.js with the File API and JSON streams.
+Adapter for working with `@cristaline/core` using Node.js with the File API and JSON streams.
 
 ### Installation
 
 ```bash
-npm install @aminnairi/eventstore-node-json-stream
+npm install @cristaline/node-json-stream
 ```
 
 ### NodeJsonStreamAdapter.for
@@ -224,8 +224,8 @@ This method allows for creating a new adapter for creating an event store.
 > We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
 
 ```typescript
-import { EventShape, createEventStore } from "@aminnairi/eventstore";
-import { NodeJsonStreamAdapter } from "@aminnairi/eventstore-node-json-stream";
+import { EventShape, createEventStore } from "@cristaline/core";
+import { NodeJsonStreamAdapter } from "@cristaline/node-json-stream";
 import { ZodSchema, z } from "zod";
 
 const eventSchema = z.object({
@@ -276,14 +276,14 @@ const eventStore = createEventStore<State, Event>({
 });
 ```
 
-## @aminnairi/eventstore-web-storage
+## @cristaline/web-storage
 
 Adapter for working with the Web Storage API using JSON streams.
 
 ### Installation
 
 ```bash
-npm install @aminnairi/eventstore-web-storage
+npm install @cristaline/web-storage
 ```
 
 ### WebStorageAdapter.for
@@ -294,8 +294,8 @@ This method allows for creating a new adapter for creating an event store.
 > We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
 
 ```typescript
-import { EventShape, createEventStore } from "@aminnairi/eventstore";
-import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
+import { EventShape, createEventStore } from "@cristaline/core";
+import { WebStorageAdapter } from "@cristaline/web-storage";
 import { ZodSchema, z } from "zod";
 
 const eventSchema = z.object({
@@ -347,14 +347,14 @@ const eventStore = createEventStore<State, Event>({
 });
 ```
 
-## @aminnairi/eventstore-react
+## @cristaline/react
 
-Bridge for working with `@aminnairi/eventstore` in a `react` application.
+Bridge for working with `@cristaline/core` in a `react` application.
 
 ### Installation
 
 ```bash
-npm install @aminnairi/eventstore-react
+npm install @cristaline/react
 ```
 
 ### defineEventStore
@@ -365,9 +365,9 @@ Define the event store for a React application.
 > We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
 
 ```typescript
-import { defineEventStore } from "@aminnairi/evenstore-react"
-import { EventShape } from "@aminnairi/eventstore";
-import { WebStorageAdapter } from "@aminnairi/eventstore-web-storage";
+import { defineEventStore } from "@cristaline/evenstore-react"
+import { EventShape } from "@cristaline/core";
+import { WebStorageAdapter } from "@cristaline/web-storage";
 import { z, ZodSchema } from "zod"
 
 const eventSchema = z.union([
@@ -536,9 +536,9 @@ export function HomePage() {
 }
 ```
 
-## What Is `@aminnairi/eventstore`
+## What Is `@cristaline/core`
 
-`@aminnairi/eventstore` is a library designed to implement the Event Sourcing pattern.
+`@cristaline/core` is a library designed to implement the Event Sourcing pattern.
 
 Event Sourcing allows you to capture a stream of immutable events that occur throughout the lifecycle of an application. These events serve as the single source of truth and can be reduced to derive the current state of your application at any point in time.
 
@@ -579,4 +579,4 @@ Event versioning ensures that no information is lost, providing a secure and aud
 
 The library leverages the Adapter Pattern to enable seamless integration with any storage backend of your choice.
 
-Whether you use the included Web Storage or Node.js JSON Stream adapters, or implement your own custom adapter, `@aminnairi/eventstore` provides portability and the flexibility to decide where and how your data is stored while handling the core Event Sourcing logic for you.
+Whether you use the included Web Storage or Node.js JSON Stream adapters, or implement your own custom adapter, `@cristaline/core` provides portability and the flexibility to decide where and how your data is stored while handling the core Event Sourcing logic for you.
