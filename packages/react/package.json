@@ -4,6 +4,9 @@
   "name": "@cristaline/react",
   "description": "React.js bridge for cristaline.",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aminnairi/cristaline/issues"
+  },
   "peerDependencies": {
     "react": ">=18.0.0"
   }

@@ -4,6 +4,9 @@
   "description": "Node.js File API adapter based on the JSON stream format.",
   "version": "0.1.0",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aminnairi/cristaline/issues"
+  },
   "devDependencies": {
     "@types/node": "^22.10.2"
   }
