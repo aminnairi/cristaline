@@ -3,6 +3,7 @@
   "type": "module",
   "name": "@cristaline/react",
   "description": "React.js bridge for cristaline.",
+  "license": "MIT",
   "peerDependencies": {
     "react": ">=18.0.0"
   }
