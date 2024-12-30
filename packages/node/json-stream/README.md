@@ -173,9 +173,7 @@ This method will allow you to save an event directly to your storage system.
 
 It also add this event to the list of events mounted in memory, as well as computing again the state of your application.
 
-Note that `saveEvent` does not request a lock on the database, this means that if there should be multiple writes at the same times, it will not wait until all other waits in the queue are done before commiting the changes and can possibly lead to data loss.
-
-If you need synchronization in a concurrent environment like Node.js or when using Workers on the Web, use the [`transaction`](#transaction) method.
+Note that `saveEvent` will request a lock on the database, this means that if there should be multiple writes at the same times, it will wait until all other waits in the queue are done before commiting the changes.
 
 #### Example
 
