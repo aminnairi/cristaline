@@ -61,12 +61,19 @@ export interface EventAdapter<Event> {
 
 export type EventStoreParser<Event> = (event: unknown) => Event | Error
 
+// PROJECTION ADAPTER
+
+export interface StateAdapter<State> {
+  readonly save: (state: State) => Promise<void>
+  readonly retrieve: () => Promise<State>
+}
+
 export type InitializeFunction = () => Promise<null | CorruptionError>
 
 export interface CreateEventStoreOptions<State, Event> {
-  readonly state: State,
   readonly parser: EventStoreParser<Event>,
   readonly eventAdapter: EventAdapter<Event>,
+  readonly stateAdapter: StateAdapter<State>,
   readonly replay: Replay<State, Event>,
 }
 
@@ -74,8 +81,6 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
   const subscribers: Subscriber[] = [];
   const uncommitedEvents: Event[] = [];
 
-  let state: State = options.state;
-  let events: Event[] = [];
   let inTransaction: boolean = false;
   let lock: Promise<void> | null = null;
 
@@ -95,7 +100,6 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
 
   async function saveEvent(event: Event): Promise<null | Error> {
     if (inTransaction) {
-      console.log("In transaction");
       uncommitedEvents.push(event);
       return null;
     }
@@ -103,9 +107,9 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
     const releaseLock = await requestLock();
 
     try {
-
-      state = options.replay(state, event);
       await options.eventAdapter.save(event);
+      const state = await options.stateAdapter.retrieve();
+      await options.stateAdapter.save(options.replay(state, event));
 
       subscribers.forEach(notify => {
         notify();
@@ -138,7 +142,8 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
         }
 
         parsedEvents.push(parsedEvent);
-        state = options.replay(state, parsedEvent);
+        const state = await options.stateAdapter.retrieve();
+        options.stateAdapter.save(options.replay(state, parsedEvent));
       }
 
       return null;
@@ -198,11 +203,11 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
 
         const uncommitedEvent = uncommitedEvents[0];
 
-        await options.adapter.save(uncommitedEvent);
+        await options.eventAdapter.save(uncommitedEvent);
 
-        state = options.replay(state, uncommitedEvent);
+        const state = await options.stateAdapter.retrieve();
 
-        events.push(uncommitedEvent);
+        await options.stateAdapter.save(options.replay(state, uncommitedEvent));
 
         uncommitedEvents.splice(0, 1);
       }
@@ -238,4 +243,6 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
     initialize,
     transaction
   }
+}
+
 }

@@ -14,9 +14,9 @@ export interface EventStoreProviderProps {
 }
 
 export interface DefineStoreOptions<State, Event> {
-  state: State,
   parser: EventStoreParser<Event>,
   eventAdapter: EventAdapter<Event>,
+  stateAdapter: StateAdapter<State>,
   replay: Replay<State, Event>
 }
 
@@ -51,9 +51,9 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
 
   const eventStore = createEventStore<State, Event>({
     eventAdapter: options.eventAdapter,
+    stateAdapter: options.stateAdapter,
     parser: options.parser,
     replay: options.replay,
-    state: options.state
   });
 
   function EventStoreProvider({ children }: EventStoreProviderProps) {
@@ -77,15 +77,21 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
 
         await eventStore.saveEvent(event);
 
+        const state = await eventStore.getState();
         const events = await eventStore.getEvents();
+
+        if (events instanceof Error) {
+          throw events;
+        }
+
         setState({
           type: "loaded",
-          value: eventStore.getState()
+          value: state
         });
 
         setEvents({
           type: "loaded",
-          value: eventStore.getEvents()
+          value: events
         });
       } catch (error) {
         const normalizedError = error instanceof Error ? error : new Error(String(error));
@@ -117,14 +123,21 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
           return Promise.reject(error);
         }
 
+        const state = await eventStore.getState();
+        const events = await eventStore.getEvents();
+
+        if (events instanceof Error) {
+          throw events;
+        }
+
         setState({
           type: "loaded",
-          value: eventStore.getState()
+          value: state
         });
 
         setEvents({
           type: "loaded",
-          value: eventStore.getEvents()
+          value: events
         });
       } catch (error) {
         const normalizedError = error instanceof Error ? error : new Error(String(error));
@@ -157,14 +170,21 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
           throw error;
         }
 
+        const state = await eventStore.getState();
+        const events = await eventStore.getEvents();
+
+        if (events instanceof Error) {
+          throw events;
+        }
+
         setState({
           type: "loaded",
-          value: eventStore.getState()
+          value: state
         });
 
         setEvents({
           type: "loaded",
-          value: eventStore.getEvents()
+          value: events
         });
       } catch (error) {
         const normalizedError = error instanceof Error ? error : new Error(String(error));
