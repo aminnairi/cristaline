@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@cristaline/core",
-  "description": "An immutable database engine built on the Event Sourcing pattern.",
+  "description": "An immutable database based on log streams.",
   "version": "0.1.0",
   "license": "MIT",
   "bugs": {

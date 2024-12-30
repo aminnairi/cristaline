@@ -1,6 +1,6 @@
 # cristaline
 
-An immutable database engine built on the Event Sourcing pattern.
+An immutable database engine based on log streams.
 
 ## Requirements
 
@@ -30,7 +30,7 @@ See [`examples`](../../examples/) for a more detailed list of examples about how
 
 ## @cristaline/core
 
-Create a database based on the Event Sourcing pattern.
+Main module for creating and initializing the database.
 
 ### Installation
 
@@ -585,22 +585,22 @@ export function HomePage() {
 }
 ```
 
-## What Is `@cristaline/core`
+## What Is `cristaline`
 
-`@cristaline/core` is a library designed to implement the Event Sourcing pattern.
+`@cristaline/core` is a library designed to help you manage your database as a stream of logs instead of a constant final state.
 
-Event Sourcing allows you to capture a stream of immutable events that occur throughout the lifecycle of an application. These events serve as the single source of truth and can be reduced to derive the current state of your application at any point in time.
+Inspired by Event Sourcing, it allows you to capture a stream of immutable events that occur throughout the lifecycle of an application. These events serve as the single source of truth and can be reduced to derive the current state of your application at any point in time.
 
-## Why Use Event Sourcing
+## Why Use `cristaline`
 
-Traditional databases store only the final state of an application at a specific moment, limiting historical visibility. Event Sourcing, on the other hand, preserves the complete history of changes, enabling you to retrace your application’s state over time.
+Traditional databases store only the final state of an application at a specific moment, limiting historical visibility. `cristaline`, on the other hand, preserves the complete history of changes, enabling you to retrace your application’s state over time.
 
 This approach provides:
 - **Enhanced traceability**: Track every change since the inception of your data.
 - **Fine-grained analytics**: Understand not just the current state but how it evolved.
 - **Time-travel debugging**: Investigate past states to diagnose issues with precision.
 
-Event Sourcing is ideal for applications requiring robust auditing, analytics, and historical data insights.
+`cristaline` is ideal for applications requiring robust auditing, analytics, and historical data insights.
 
 ## Who Is It For
 
@@ -616,7 +616,7 @@ State reconstruction involves reducing a series of events into a single, coheren
 
 ## Event Versioning
 
-As your application's requirements evolve, so will the structure of your events. Unlike traditional database systems that overwrite schema changes (e.g., `ALTER TABLE`), Event Sourcing ensures that all historical data remains intact by introducing new event versions.
+As your application's requirements evolve, so will the structure of your events. Unlike traditional database systems that overwrite schema changes (e.g., `ALTER TABLE`), `cristaline` ensures that all historical data remains intact by introducing new event versions.
 
 This approach allows:
 - **Backward compatibility**: Preserve and utilize older events.
@@ -628,4 +628,4 @@ Event versioning ensures that no information is lost, providing a secure and aud
 
 The library leverages the Adapter Pattern to enable seamless integration with any storage backend of your choice.
 
-Whether you use the included Web Storage or Node.js JSON Stream adapters, or implement your own custom adapter, `@cristaline/core` provides portability and the flexibility to decide where and how your data is stored while handling the core Event Sourcing logic for you.
+Whether you use the included Web Storage or Node.js adapters, or implement your own custom adapter, `cristaline` provides portability and the flexibility to decide where and how your data is stored while handling the core logic for you.
