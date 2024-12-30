@@ -1,10 +1,11 @@
-import { Adapter, EventShape, EventStoreParser, Replay, createEventStore } from "@cristaline/core";
+import { Adapter, EventShape, EventStoreParser, Replay, TransactionCallbackFunction, createEventStore } from "@cristaline/core";
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 
 export interface EventStoreContextInterface<State, Event extends EventShape> {
   state: TransientState<Readonly<State>>,
   events: TransientState<ReadonlyArray<Event>>,
   saveEvent: (event: Event) => void,
+  transaction: (callback: TransactionCallbackFunction<Event>) => void,
   refresh: () => Promise<void>
 }
 
@@ -43,6 +44,7 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
     state: {
       type: "loading"
     },
+    transaction: async () => null,
     saveEvent: () => { },
     refresh: async () => { }
   });
@@ -138,12 +140,53 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
       }
     }, []);
 
+    const transaction = useMemo(() => async (callback: TransactionCallbackFunction<Event>) => {
+      try {
+        setState({
+          type: "loading"
+        });
+
+        setEvents({
+          type: "loading"
+        });
+
+        const error = await eventStore.transaction(callback);
+
+        if (error) {
+          throw error;
+        }
+
+        setState({
+          type: "loaded",
+          value: eventStore.getState()
+        });
+
+        setEvents({
+          type: "loaded",
+          value: eventStore.getEvents()
+        });
+      } catch (error) {
+        const normalizedError = error instanceof Error ? error : new Error(String(error));
+
+        setState({
+          type: "issue",
+          error: normalizedError
+        });
+
+        setEvents({
+          type: "issue",
+          error: normalizedError
+        });
+      }
+    }, []);
+
     const value = useMemo((): EventStoreContextInterface<State, Event> => {
       return {
         state,
         events,
         saveEvent,
-        refresh
+        refresh,
+        transaction
       };
     }, [state, events]);
 
