@@ -45,8 +45,8 @@ export type TransactionFunction = (callback: TransactionCallbackFunction) => Pro
 
 export interface EventStore<State, Event> {
   readonly saveEvent: (event: Event) => Promise<null | Error>;
-  readonly getState: () => Readonly<State>;
   readonly getEvents: () => Promise<ReadonlyArray<Event> | CorruptionError>;
+  readonly getState: () => Promise<Readonly<State>>;
   readonly subscribe: SubscribeFunction;
   readonly initialize: InitializeFunction;
   readonly transaction: TransactionFunction
@@ -139,8 +139,8 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
     }
   }
 
-  function getState(): Readonly<State> {
-    return state;
+  function getState(): Promise<Readonly<State>> {
+    return options.stateAdapter.retrieve();
   }
 
   async function getEvents(): Promise<ReadonlyArray<Event> | CorruptionError> {
