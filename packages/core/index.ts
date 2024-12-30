@@ -30,18 +30,18 @@ export type UnsubscribeFunction = () => void
 
 export type SubscribeFunction = (subscriber: Subscriber) => UnsubscribeFunction
 
-export type TransactionCommitFunction<Event> = (event: Event) => void;
+export type TransactionCommitFunction = () => Promise<void>;
 
 export type TransactionRollbackFunction = () => void;
 
-export interface TransactionCallbackOptions<Event> {
-  readonly commit: TransactionCommitFunction<Event>
+export interface TransactionCallbackOptions {
+  readonly commit: TransactionCommitFunction
   readonly rollback: TransactionRollbackFunction
 }
 
-export type TransactionCallbackFunction<Event> = (options: TransactionCallbackOptions<Event>) => Promise<void>
+export type TransactionCallbackFunction = (options: TransactionCallbackOptions) => Promise<void>
 
-export type TransactionFunction<Event> = (callback: TransactionCallbackFunction<Event>) => Promise<TransactionError | null>
+export type TransactionFunction = (callback: TransactionCallbackFunction) => Promise<TransactionError | null>
 
 export interface EventStore<State, Event> {
   readonly saveEvent: (event: Event) => Promise<null | Error>;
@@ -49,7 +49,7 @@ export interface EventStore<State, Event> {
   readonly getState: () => Readonly<State>;
   readonly subscribe: SubscribeFunction;
   readonly initialize: InitializeFunction;
-  readonly transaction: TransactionFunction<Event>
+  readonly transaction: TransactionFunction
 }
 
 export type ReleaseLockFunction = () => void;
@@ -77,8 +77,15 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
 
   let state: State = options.state;
   let events: Event[] = [];
+  let inTransaction: boolean = false;
 
   async function saveEvent(event: Event): Promise<null | Error> {
+    if (inTransaction) {
+      console.log("In transaction");
+      uncommitedEvents.push(event);
+      return null;
+    }
+
     const releaseLock = await options.adapter.requestLock();
 
     try {
@@ -154,24 +161,17 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
     }
   }
 
-  async function transaction(callback: TransactionCallbackFunction<Event>): Promise<TransactionError | null> {
-    function commit(event: Event): void {
-      uncommitedEvents.push(event);
-    }
+  async function transaction(callback: TransactionCallbackFunction): Promise<TransactionError | null> {
+    inTransaction = true;
 
     function rollback(): void {
       uncommitedEvents.length = 0;
     }
 
-    const releaseLock = await options.adapter.requestLock();
-
-    try {
-      await callback({
-        commit,
-        rollback
-      });
-
+    async function commit(): Promise<void> {
       while (uncommitedEvents.length > 0) {
+        console.log("DEBUG: commiting event...");
+
         const uncommitedEvent = uncommitedEvents[0];
 
         await options.adapter.save(uncommitedEvent);
@@ -183,11 +183,25 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
         uncommitedEvents.splice(0, 1);
       }
 
+      subscribers.forEach(notify => {
+        notify();
+      });
+    }
+
+    const releaseLock = await options.adapter.requestLock();
+
+    try {
+      await callback({
+        commit,
+        rollback
+      });
+
       return null;
     } catch (error) {
       rollback();
       return new TransactionError(error instanceof Error ? error : new Error(String(error)));
     } finally {
+      inTransaction = false;
       releaseLock();
     }
   }
