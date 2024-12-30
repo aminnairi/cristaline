@@ -79,8 +79,6 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
   let events: Event[] = [];
 
   async function saveEvent(event: Event): Promise<null | Error> {
-    const releaseLock = await options.adapter.requestLock();
-
     try {
       await options.adapter.save(event);
 
@@ -94,8 +92,6 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
       return null;
     } catch (error) {
       return error instanceof Error ? error : new Error(String(error));
-    } finally {
-      releaseLock();
     }
   }
 
