@@ -173,6 +173,8 @@ This method will allow you to save an event directly to your storage system.
 
 It also add this event to the list of events mounted in memory, as well as computing again the state of your application.
 
+Note that `saveEvent` request a lock on the database, this means that if there should be multiple writes at the same times, it will wait until all other waits in the queue are done before commiting the changes.
+
 #### Example
 
 ```typescript
@@ -192,6 +194,50 @@ if (error instanceof Error) {
 } else {
   console.log("User created successfully");
 }
+```
+
+### transaction
+
+For the times where you need to prevent write before finishing an action while operating on the database, it can be great to lock the database while performing an algorithm, this method has been designed specifically for that purpose, letting you commit or rollback changes as the algorithm run.
+
+```typescript
+const usersToSave = [
+  { email: "first@app.com" },
+  { email: "second@app.com" },
+  { email: "third@app.com" },
+];
+
+eventStore.transaction(async ({ commit, rollback }) => {
+  const state = eventStore.getState();
+
+  for (const user of users) {
+    const shouldBeSaved = state.users.every(user => {
+      return usersToSave.every(userToSave => {
+        return userToSave.email !== user.email;
+      });
+    });
+
+    if (shouldBeSaved) {
+      commit({
+        type: "USER_CREATED",
+        identifier: crypto.randomUUID(),
+        version: 1,
+        date: new Date(),
+        data: {
+          id: crypto.randomUUID(),
+          email: user.email,
+        },
+      });
+    }
+
+    const unexpectedErrorOccurred = Math.random() > 0.5;
+
+    if (unexpectedErrorOccurred) {
+      rollback();
+      return;
+    }
+  }
+});
 ```
 
 ### subscribe
