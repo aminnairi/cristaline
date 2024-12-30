@@ -245,4 +245,42 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
   }
 }
 
+export interface MemoryStateAdapterOptions<State> {
+  readonly state: State
+}
+
+export class MemoryStateAdapter<State> implements StateAdapter<State> {
+  private constructor(private state: State) { }
+
+  public static for<State>(options: MemoryStateAdapterOptions<State>): MemoryStateAdapter<State> {
+    return new MemoryStateAdapter(options.state);
+  }
+
+  public async save(state: State): Promise<void> {
+    this.state = state;
+  }
+
+  public async retrieve(): Promise<State> {
+    return this.state;
+  }
+}
+
+export interface MemoryEventAdapterOptions<Event> {
+  readonly events: unknown[]
+}
+
+export class MemoryEventAdapter<Event> implements EventAdapter<Event> {
+  private constructor(private readonly events: unknown[]) { }
+
+  public static for<Event>(options: MemoryEventAdapterOptions<Event>): MemoryEventAdapter<Event> {
+    return new MemoryEventAdapter(options.events);
+  }
+
+  public async save(event: Event): Promise<void> {
+    this.events.push(event);
+  }
+
+  public async retrieve(): Promise<unknown[]> {
+    return this.events;
+  }
 }
