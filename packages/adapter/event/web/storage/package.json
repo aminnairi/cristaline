@@ -1,0 +1,14 @@
+{
+  "type": "module",
+  "name": "@cristaline/adapter-event-web-storage",
+  "description": "Web Storage API adapter based on the JSON stream format.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aminnairi/cristaline/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aminnairi/cristaline.git"
+  }
+}
