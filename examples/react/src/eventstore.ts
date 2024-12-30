@@ -1,5 +1,5 @@
 import { defineEventStore } from "@cristaline/react"
-import { EventShape } from "@cristaline/core";
+import { EventShape, MemoryStateAdapter } from "@cristaline/core";
 import { WebStorageAdapter } from "@cristaline/web-storage";
 import { z, ZodSchema } from "zod"
 
@@ -39,12 +39,14 @@ type State = {
 
 export const { EventStoreProvider, useEventStore } = defineEventStore<State, Event>({
   parser: eventSchema.parse,
-  state: {
-    users: []
-  },
-  adapter: WebStorageAdapter.for({
+  eventAdapter: WebStorageAdapter.for<Event>({
     key: "events",
     storage: localStorage
+  }),
+  stateAdapter: MemoryStateAdapter.for<State>({
+    state: {
+      users: []
+    }
   }),
   replay: (state, event) => {
     switch (event.type) {

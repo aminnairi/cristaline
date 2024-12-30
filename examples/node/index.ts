@@ -1,4 +1,4 @@
-import { createEventStore } from "@cristaline/core";
+import { createEventStore, MemoryStateAdapter } from "@cristaline/core";
 import { z } from "zod";
 import { NodeJsonStreamAdapter } from "@cristaline/node-json-stream";
 import express from "express";
@@ -47,12 +47,14 @@ type Event = z.infer<typeof eventSchema>;
 async function main() {
   const { saveEvent, transaction, getState, initialize } = createEventStore<State, Event>({
     parser: eventSchema.parse,
-    adapter: NodeJsonStreamAdapter.for({
+    eventAdapter: NodeJsonStreamAdapter.for({
       path: "database.jsonl",
     }),
-    state: {
-      users: []
-    },
+    stateAdapter: MemoryStateAdapter.for<State>({
+      state: {
+        users: []
+      }
+    }),
     replay: (state, event) => {
       switch (event.type) {
         case "USER_CREATED":
@@ -122,8 +124,8 @@ async function main() {
     }
   });
 
-  server.get("/users", (request, response) => {
-    const state = getState();
+  server.get("/users", async (request, response) => {
+    const state = await getState();
 
     response.status(200).json({
       users: state.users
