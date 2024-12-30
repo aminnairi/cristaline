@@ -5,7 +5,7 @@ export interface EventStoreContextInterface<State, Event extends EventShape> {
   state: TransientState<Readonly<State>>,
   events: TransientState<ReadonlyArray<Event>>,
   saveEvent: (event: Event) => void,
-  transaction: (callback: TransactionCallbackFunction<Event>) => void,
+  transaction: (callback: TransactionCallbackFunction) => void,
   refresh: () => Promise<void>
 }
 
@@ -140,7 +140,7 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
       }
     }, []);
 
-    const transaction = useMemo(() => async (callback: TransactionCallbackFunction<Event>) => {
+    const transaction = useMemo(() => async (callback: TransactionCallbackFunction) => {
       try {
         setState({
           type: "loading"
