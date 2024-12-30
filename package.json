@@ -2,8 +2,8 @@
   "private": true,
   "workspaces": [
     "packages/core",
-    "packages/node/json-stream",
-    "packages/web/storage",
+    "packages/adapter/event/node/json-stream",
+    "packages/adapter/event/web/storage",
     "packages/react",
     "examples/node",
     "examples/react"

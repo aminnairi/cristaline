@@ -22,8 +22,8 @@ See below for a list of available adapters
 ## Packages
 
 - [`@cristaline/core`](#cristalinecore)
-- [`@cristaline/web-storage`](#cristalineweb-storage)
-- [`@cristaline/node-json-stream`](#cristalinenode-json-stream)
+- [`@cristaline/adapter-event-web-storage`](#cristalineweb-storage)
+- [`@cristaline/adapter-event-node-json-stream`](#cristalinenode-json-stream)
 - [`@cristaline/react`](#cristalinereact)
 
 See [`examples`](./examples/) for a more detailed list of examples about how to use these libraries.
@@ -254,17 +254,17 @@ eventStore.subscribe(() => {
 });
 ```
 
-## @cristaline/node-json-stream
+## @cristaline/adapter-event-node-json-stream
 
 Adapter for working with `@cristaline/core` using Node.js with the File API and JSON streams.
 
 ### Installation
 
 ```bash
-npm install @cristaline/node-json-stream
+npm install @cristaline/adapter-event-node-json-stream
 ```
 
-### NodeJsonStreamAdapter.for
+### NodeJsonStreamEventAdapter.for
 
 This method allows for creating a new adapter for creating an event store.
 
@@ -275,7 +275,7 @@ This method allows for creating a new adapter for creating an event store.
 
 ```typescript
 import { EventShape, createEventStore, MemoryStateAdapter } from "@cristaline/core";
-import { NodeJsonStreamAdapter } from "@cristaline/node-json-stream";
+import { NodeJsonStreamEventAdapter } from "@cristaline/adapter-event-node-json-stream";
 import { ZodSchema, z } from "zod";
 
 const eventSchema = z.object({
@@ -302,7 +302,7 @@ type State = {
 
 const eventStore = createEventStore<State, Event>({
   parser: eventSchema.parse,
-  eventAdapter: NodeJsonStreamAdapter.for({
+  eventAdapter: NodeJsonStreamEventAdapter.for({
     path: "events.jsonl"
   }),
   stateAdapter: MemoryStateAdapter.for<State>({
@@ -328,17 +328,17 @@ const eventStore = createEventStore<State, Event>({
 });
 ```
 
-## @cristaline/web-storage
+## @cristaline/adapter-event-web-storage
 
 Adapter for working with the Web Storage API using JSON streams.
 
 ### Installation
 
 ```bash
-npm install @cristaline/web-storage
+npm install @cristaline/adapter-event-web-storage
 ```
 
-### WebStorageAdapter.for
+### WebStorageEventAdapter.for
 
 This method allows for creating a new adapter for creating an event store.
 
@@ -347,7 +347,7 @@ This method allows for creating a new adapter for creating an event store.
 
 ```typescript
 import { EventShape, createEventStore, MemoryStateAdapter } from "@cristaline/core";
-import { WebStorageAdapter } from "@cristaline/web-storage";
+import { WebStorageEventAdapter } from "@cristaline/adapter-event-web-storage";
 import { ZodSchema, z } from "zod";
 
 const eventSchema = z.object({
@@ -374,7 +374,7 @@ type State = {
 
 const eventStore = createEventStore<State, Event>({
   parser: eventSchema.parse,
-  eventAdapter: WebStorageAdapter.for({
+  eventAdapter: WebStorageEventAdapter.for({
     key: "events",
     storage: window.localStorage
   }),
