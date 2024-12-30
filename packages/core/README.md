@@ -612,10 +612,13 @@ This library is suited for:
 
 By storing events instead of derived states, you gain unparalleled visibility into what occurred, when, and why, making investigations and analyses significantly easier.
 
+## Features
+
+### State Reconstruction
 
 State reconstruction involves reducing a series of events into a single, coherent state representation. This allows you to interact with your application's current state while maintaining the complete traceability and history of events.
 
-## Event Versioning
+### Event Versioning
 
 As your application's requirements evolve, so will the structure of your events. Unlike traditional database systems that overwrite schema changes (e.g., `ALTER TABLE`), `cristaline` ensures that all historical data remains intact by introducing new event versions.
 
@@ -625,8 +628,26 @@ This approach allows:
 
 Event versioning ensures that no information is lost, providing a secure and auditable evolution of your application’s state.
 
-## Adapter Pattern
+### Adapter Pattern
 
 The library leverages the Adapter Pattern to enable seamless integration with any storage backend of your choice.
 
 Whether you use the included Web Storage or Node.js adapters, or implement your own custom adapter, `cristaline` provides portability and the flexibility to decide where and how your data is stored while handling the core logic for you.
+
+### Mutation-Free
+
+One of the challenges of evolving a database schema is to keep the informations already stored, while mutating the database schema at the same time.
+
+This can be especially difficult if you face data-loss due to schema changes.
+
+`cristaline` does not have the concept of migration. Instead, as logs are immutable, it relies on a versioning system directly baked-in the event logs that you stored as the mechanism for evolving your state.
+
+Since the state is only a reduced version of all your logs, you can literally make your state evolve whenever you want, even if there are no structural changes in the shape of your events, this is what makes it a powerful solution for those who seek reliability and fast schema changes since it does not operate directly on the state but rather on the events.
+
+### Portable
+
+`cristaline` is not tied to any type of storage, whether it is your memory, a file, a local database, a container, a remote database, you can adapt any of these to work with `cristaline`.
+
+This allow you to deploy, evolve and migrate your storage based on your needs or the available resources at the time being.
+
+It also helps not tie you to a specific provider. You can even use it from any environment: Web, servers, mobile, desktop, wherever you can store values, `cristaline` will work.
