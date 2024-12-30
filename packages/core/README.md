@@ -26,7 +26,7 @@ See below for a list of available adapters
 - [`@cristaline/node-json-stream`](#cristalinenode-json-stream)
 - [`@cristaline/react`](#cristalinereact)
 
-See [`examples`](../../examples/) for a more detailed list of examples about how to use these libraries.
+See [`examples`](./examples/) for a more detailed list of examples about how to use these libraries.
 
 ## @cristaline/core
 
