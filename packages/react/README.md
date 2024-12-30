@@ -585,13 +585,15 @@ export function HomePage() {
 }
 ```
 
-## What Is `cristaline`
+## Rationale
+
+### What Is `cristaline`
 
 `@cristaline/core` is a library designed to help you manage your database as a stream of logs instead of a constant final state.
 
 Inspired by Event Sourcing, it allows you to capture a stream of immutable events that occur throughout the lifecycle of an application. These events serve as the single source of truth and can be reduced to derive the current state of your application at any point in time.
 
-## Why Use `cristaline`
+### Why Use `cristaline`
 
 Traditional databases store only the final state of an application at a specific moment, limiting historical visibility. `cristaline`, on the other hand, preserves the complete history of changes, enabling you to retrace your application’s state over time.
 
@@ -602,7 +604,7 @@ This approach provides:
 
 `cristaline` is ideal for applications requiring robust auditing, analytics, and historical data insights.
 
-## Who Is It For
+### Who Is It For
 
 This library is suited for:
 - **Functional programming enthusiasts** who value immutability and state derivation through pure functions.
@@ -610,7 +612,6 @@ This library is suited for:
 
 By storing events instead of derived states, you gain unparalleled visibility into what occurred, when, and why, making investigations and analyses significantly easier.
 
-## State Reconstruction
 
 State reconstruction involves reducing a series of events into a single, coherent state representation. This allows you to interact with your application's current state while maintaining the complete traceability and history of events.
 
