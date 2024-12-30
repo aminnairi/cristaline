@@ -57,7 +57,6 @@ export type ReleaseLockFunction = () => void;
 export interface EventAdapter<Event> {
   readonly save: (event: Event) => Promise<void>
   readonly retrieve: () => Promise<unknown[]>
-  readonly requestLock: () => Promise<ReleaseLockFunction>
 }
 
 export type EventStoreParser<Event> = (event: unknown) => Event | Error
@@ -78,6 +77,21 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
   let state: State = options.state;
   let events: Event[] = [];
   let inTransaction: boolean = false;
+  let lock: Promise<void> | null = null;
+
+  async function requestLock() {
+    let releaseLock: ReleaseLockFunction = () => { };
+
+    if (lock instanceof Promise) {
+      await lock;
+    }
+
+    lock = new Promise<void>(resolve => {
+      releaseLock = resolve
+    });
+
+    return releaseLock;
+  }
 
   async function saveEvent(event: Event): Promise<null | Error> {
     if (inTransaction) {
@@ -86,7 +100,7 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
       return null;
     }
 
-    const releaseLock = await options.adapter.requestLock();
+    const releaseLock = await requestLock();
 
     try {
 
@@ -106,7 +120,7 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
   }
 
   async function initialize(): Promise<null | CorruptionError> {
-    const releaseLock = await options.adapter.requestLock();
+    const releaseLock = await requestLock();
 
     try {
       const receivedEvents: unknown[] = await options.eventAdapter.retrieve();
@@ -198,7 +212,7 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
       });
     }
 
-    const releaseLock = await options.adapter.requestLock();
+    const releaseLock = await requestLock();
 
     try {
       await callback({

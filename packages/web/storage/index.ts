@@ -10,19 +10,6 @@ export class WebStorageAdapter<Event> implements EventAdapter<Event> {
 
   private constructor(private readonly storage: Storage, private readonly eventsKey: string) { }
 
-  public async requestLock(): Promise<ReleaseLockFunction> {
-    let releaseLock: ReleaseLockFunction = () => { };
-
-    if (this.lock instanceof Promise) {
-      await this.lock;
-    }
-
-    this.lock = new Promise(resolve => {
-      releaseLock = resolve
-    });
-
-    return releaseLock;
-  }
 
   public static for<Event>({ storage, key: eventsKey }: WebStorageAdapterOptions): WebStorageAdapter<Event> {
     return new WebStorageAdapter(storage, eventsKey);
