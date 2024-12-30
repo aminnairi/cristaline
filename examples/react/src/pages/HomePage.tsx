@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useEventStore } from "../eventstore";
 
 export function HomePage() {
-  const { state, transaction } = useEventStore();
+  const { state, saveEvent, transaction } = useEventStore();
 
   const addUser = useCallback(() => {
     if (state.type !== "loaded") {
@@ -11,25 +11,31 @@ export function HomePage() {
     }
 
     transaction(async ({ commit, rollback }) => {
-      const email = `${crypto.randomUUID()}@gmail.com`;
+      try {
+        const email = `${crypto.randomUUID()}@gmail.com`;
 
-      if (state.value.users.some(user => user.email === email)) {
+        if (state.value.users.some(user => user.email === email)) {
+          rollback();
+          return;
+        }
+
+        saveEvent({
+          type: "USER_CREATED",
+          version: 1,
+          identifier: crypto.randomUUID(),
+          date: new Date(),
+          data: {
+            id: crypto.randomUUID(),
+            email,
+          },
+        });
+
+        await commit();
+      } catch {
         rollback();
-        return;
       }
-
-      commit({
-        type: "USER_CREATED",
-        version: 1,
-        identifier: crypto.randomUUID(),
-        date: new Date(),
-        data: {
-          id: crypto.randomUUID(),
-          email,
-        },
-      });
-    })
-  }, [state, transaction]);
+    });
+  }, [state, saveEvent, transaction]);
 
   if (state.type === "loading") {
     return (
