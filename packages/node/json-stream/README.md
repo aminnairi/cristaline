@@ -48,7 +48,7 @@ Create the shape of the event, and how to create a projection from those events.
 > We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
 
 ```typescript
-import { EventShape, createEventStore } from "@cristaline/core";
+import { EventShape, createEventStore, MemoryStateAdapter, MemoryEventAdapter } from "@cristaline/core";
 import { ZodSchema, z } from "zod";
 
 const eventSchema = z.union([
@@ -86,12 +86,13 @@ type State = {
 
 const eventStore = createEventStore<State, Event>({
   parser: eventSchema.parse,
-  state: {
-    users: []
-  },
-  adapter: WebStorageAdapter.for({
-    key: "events",
-    storage: window.localStorage,
+  stateAdapter: MemoryStateAdapter.for<State>({
+    state: {
+      users: []
+    }
+  }),
+  adapter: MemoryEventAdapter.for<Event>({
+    events: []
   }),
   replay: (state, event) => {
     switch (event.type) {
@@ -148,7 +149,7 @@ This is a simple getter for accessing the events log as an array.
 #### Example
 
 ```typescript
-const events = eventStore.getEvents();
+const events = await eventStore.getEvents();
 
 for (const event of events) {
   console.log(event.type);
@@ -160,7 +161,7 @@ for (const event of events) {
 This is also a getter method that will get you the actual state of your application computed from your events log.
 
 ```typescript
-const state = eventStore.getState();
+const state = await eventStore.getState();
 
 for (const user of state.users) {
   console.log(user.email);
@@ -273,7 +274,7 @@ This method allows for creating a new adapter for creating an event store.
 > We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
 
 ```typescript
-import { EventShape, createEventStore } from "@cristaline/core";
+import { EventShape, createEventStore, MemoryStateAdapter } from "@cristaline/core";
 import { NodeJsonStreamAdapter } from "@cristaline/node-json-stream";
 import { ZodSchema, z } from "zod";
 
@@ -301,12 +302,14 @@ type State = {
 
 const eventStore = createEventStore<State, Event>({
   parser: eventSchema.parse,
-  adapter: NodeJsonStreamAdapter.for({
+  eventAdapter: NodeJsonStreamAdapter.for({
     path: "events.jsonl"
   }),
-  initialState: {
-    users: []
-  },
+  stateAdapter: MemoryStateAdapter.for<State>({
+    state: {
+      users: []
+    }
+  }),
   replay: (state, event) => {
     switch (event.type) {
       case "USER_CREATED":
@@ -343,7 +346,7 @@ This method allows for creating a new adapter for creating an event store.
 > We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
 
 ```typescript
-import { EventShape, createEventStore } from "@cristaline/core";
+import { EventShape, createEventStore, MemoryStateAdapter } from "@cristaline/core";
 import { WebStorageAdapter } from "@cristaline/web-storage";
 import { ZodSchema, z } from "zod";
 
@@ -371,13 +374,15 @@ type State = {
 
 const eventStore = createEventStore<State, Event>({
   parser: eventSchema.parse,
-  adapter: WebStorageAdapter.for({
+  eventAdapter: WebStorageAdapter.for({
     key: "events",
     storage: window.localStorage
   }),
-  initialState: {
-    users: []
-  },
+  stateAdapter: MemoryStateAdapter.for<State>({
+    state: {
+      users: []
+    }
+  }),
   replay: (state, event) => {
     switch (event.type) {
       case "USER_CREATED":
@@ -415,7 +420,7 @@ Define the event store for a React application.
 
 ```typescript
 import { defineEventStore } from "@cristaline/evenstore-react"
-import { EventShape } from "@cristaline/core";
+import { EventShape, MemoryStateAdapter } from "@cristaline/core";
 import { WebStorageAdapter } from "@cristaline/web-storage";
 import { z, ZodSchema } from "zod"
 
@@ -455,12 +460,14 @@ type State = {
 
 export const { EventStoreProvider, useEventStore } = defineEventStore<State, Event>({
   parser: eventSchema.parse,
-  state: {
-    users: []
-  },
-  adapter: WebStorageAdapter.for({
+  eventAdapter: WebStorageAdapter.for<Event>({
     key: "events",
     storage: localStorage
+  }),
+  stateAdapter: MemoryStateAdapter.for<State>({
+    state: {
+      users: []
+    }
   }),
   replay: (state, event) => {
     switch (event.type) {
