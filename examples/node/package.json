@@ -6,6 +6,8 @@
     "start": "tsx index.ts"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "tsx": "^4.19.2"
+  },
   }
 }
