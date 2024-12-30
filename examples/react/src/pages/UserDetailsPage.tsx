@@ -3,7 +3,7 @@ import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } fro
 import { useEventStore } from "../eventstore";
 
 export function UserDetailsPage() {
-  const { state, saveEvent } = useEventStore();
+  const { state, transaction } = useEventStore();
   const params = useParams();
   const userId = useMemo(() => params["userId"], [params]);
   const [email, setEmail] = useState("");
@@ -29,17 +29,29 @@ export function UserDetailsPage() {
       return;
     }
 
-    saveEvent({
-      date: new Date(),
-      identifier: crypto.randomUUID(),
-      type: "USER_UPDATED",
-      version: 1,
-      data: {
-        email,
-        id: userId
+    transaction(async ({ commit, rollback }) => {
+      if (state.type !== "loaded") {
+        rollback();
+        return;
       }
+
+      if (state.value.users.some(user => user.email === email)) {
+        rollback();
+        return;
+      }
+
+      commit({
+        date: new Date(),
+        identifier: crypto.randomUUID(),
+        type: "USER_UPDATED",
+        version: 1,
+        data: {
+          email,
+          id: userId
+        }
+      });
     });
-  }, [userId, saveEvent, email]);
+  }, [transaction, state, userId, email]);
 
   useEffect(() => {
     if (user) {
