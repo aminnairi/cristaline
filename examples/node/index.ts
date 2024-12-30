@@ -1,6 +1,7 @@
 import { createEventStore } from "@cristaline/core";
 import { z } from "zod";
 import { NodeJsonStreamAdapter } from "@cristaline/node-json-stream";
+import express from "express";
 
 const stateSchema = z.object({
   users: z.array(z.object({
@@ -86,34 +87,52 @@ async function main() {
     return;
   }
 
-  await transaction(async ({ commit, rollback }) => {
-    try {
-      await Promise.all(Array.from(Array(10)).map(async (_, index) => {
-        await saveEvent({
-          identifier: crypto.randomUUID(),
-          type: "USER_CREATED",
-          version: 1,
-          date: new Date(),
-          data: {
-            identifier: crypto.randomUUID(),
-            email: `user-${index + 1}@gmail.com`,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }
-        });
-      }));
+  const server = express();
 
-      await commit();
-    } catch {
-      rollback();
+  server.post("/users", async (request, response) => {
+    try {
+      await transaction(async ({ commit, rollback }) => {
+        try {
+          await Promise.all(Array.from(Array(10)).map(async (_, index) => {
+            await saveEvent({
+              identifier: crypto.randomUUID(),
+              type: "USER_CREATED",
+              version: 1,
+              date: new Date(),
+              data: {
+                identifier: crypto.randomUUID(),
+                email: `user-${index + 1}@gmail.com`,
+                createdAt: new Date(),
+                updatedAt: new Date()
+              }
+            });
+          }));
+
+          await commit();
+        } catch {
+          rollback();
+        }
+      });
+
+      response.status(201).end();
+    } catch (error) {
+      response.status(500).json({
+        error: String(error)
+      });
     }
   });
 
-  console.log("Fetching state...");
+  server.get("/users", (request, response) => {
+    const state = getState();
 
-  const state = getState();
+    response.status(200).json({
+      users: state.users
+    });
+  });
 
-  console.log(state);
+  server.listen(8000, () => {
+    console.log("Server listening on http://localhost:8000");
+  });
 }
 
 main().catch(error => {
