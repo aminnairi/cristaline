@@ -1,4 +1,4 @@
-# cristaline
+# `cristaline`
 
 An immutable database engine based on log streams.
 
@@ -28,7 +28,7 @@ See below for a list of available adapters
 
 See [`examples`](./examples/) for a more detailed list of examples about how to use these libraries.
 
-## @cristaline/core
+## `@cristaline/core`
 
 Main module for creating and initializing the database.
 
@@ -38,7 +38,7 @@ Main module for creating and initializing the database.
 npm install @cristaline/core
 ```
 
-### createEventStore
+### `createEventStore`
 
 Create the shape of the event, and how to create a projection from those events.
 
@@ -124,7 +124,7 @@ const eventStore = createEventStore<State, Event>({
 });
 ```
 
-### initialize
+### `initialize`
 
 This function lets you initialize the state and events that are stored and retrieved from the storage system and mounts them in memory to increase their access.
 
@@ -142,7 +142,7 @@ if (error instanceof Error) {
 }
 ```
 
-### getEvents
+### `getEvents`
 
 This is a simple getter for accessing the events log as an array.
 
@@ -156,7 +156,7 @@ for (const event of events) {
 }
 ```
 
-### getState
+### `getState`
 
 This is also a getter method that will get you the actual state of your application computed from your events log.
 
@@ -168,7 +168,7 @@ for (const user of state.users) {
 }
 ```
 
-### saveEvent
+### `saveEvent`
 
 This method will allow you to save an event directly to your storage system.
 
@@ -197,7 +197,7 @@ if (error instanceof Error) {
 }
 ```
 
-### transaction
+### `transaction`
 
 For the times where you need to prevent write before finishing an action while operating on the database, it can be great to lock the database while performing an algorithm, this method has been designed specifically for that purpose, letting you commit or rollback changes as the algorithm run.
 
@@ -244,7 +244,7 @@ eventStore.transaction(async ({ commit, rollback }) => {
 });
 ```
 
-### subscribe
+### `subscribe`
 
 This method will help you react to any change in your event store whenever an event has been added.
 
@@ -254,7 +254,7 @@ eventStore.subscribe(() => {
 });
 ```
 
-## @cristaline/adapter-event-node-json-stream
+## `@cristaline/adapter-event-node-json-stream`
 
 Adapter for working with `@cristaline/core` using Node.js with the File API and JSON streams.
 
@@ -264,7 +264,7 @@ Adapter for working with `@cristaline/core` using Node.js with the File API and 
 npm install @cristaline/adapter-event-node-json-stream
 ```
 
-### NodeJsonStreamEventAdapter.for
+### `NodeJsonStreamEventAdapter.for`
 
 This method allows for creating a new adapter for creating an event store.
 
@@ -328,7 +328,7 @@ const eventStore = createEventStore<State, Event>({
 });
 ```
 
-## @cristaline/adapter-event-web-storage
+## `@cristaline/adapter-event-web-storage`
 
 Adapter for working with the Web Storage API using JSON streams.
 
@@ -338,7 +338,7 @@ Adapter for working with the Web Storage API using JSON streams.
 npm install @cristaline/adapter-event-web-storage
 ```
 
-### WebStorageEventAdapter.for
+### `WebStorageEventAdapter.for`
 
 This method allows for creating a new adapter for creating an event store.
 
@@ -401,7 +401,7 @@ const eventStore = createEventStore<State, Event>({
 });
 ```
 
-## @cristaline/react
+## `@cristaline/react`
 
 Bridge for working with `@cristaline/core` in a `react` application.
 
@@ -411,7 +411,7 @@ Bridge for working with `@cristaline/core` in a `react` application.
 npm install @cristaline/react
 ```
 
-### defineEventStore
+### `defineEventStore`
 
 Define the event store for a React application.
 
@@ -499,7 +499,7 @@ export const { EventStoreProvider, useEventStore } = defineEventStore<State, Eve
 });
 ```
 
-### EventStoreProvider
+### `EventStoreProvider`
 
 React component used for initializing the event store.
 
@@ -525,7 +525,7 @@ createRoot(rootElement).render(
 );
 ```
 
-### useEventStore
+### `useEventStore`
 
 React hook used to access the functions exposed from an event store.
 
