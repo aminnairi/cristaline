@@ -43,7 +43,7 @@ type State = z.infer<typeof stateSchema>
 
 type Event = z.infer<typeof eventSchema>;
 
-const { saveEvent, getState } = createEventStore<State, Event>({
+const { transaction, getState } = createEventStore<State, Event>({
   parser: eventSchema.parse,
   adapter: NodeJsonStreamAdapter.for({
     path: "database.jsonl",
@@ -80,24 +80,26 @@ const { saveEvent, getState } = createEventStore<State, Event>({
 
 console.log("Saving events...");
 
-await Promise.all(Array.from(Array(10)).map(async (_, index) => {
-  console.log(`Saving event #${index + 1}...`);
+await transaction(async ({ commit }) => {
+  Array.from(Array(100)).forEach((_, index) => {
+    console.log(`Saving event #${index + 1}...`);
 
-  await saveEvent({
-    identifier: crypto.randomUUID(),
-    type: "USER_CREATED",
-    version: 1,
-    date: new Date(),
-    data: {
+    commit({
       identifier: crypto.randomUUID(),
-      email: `${crypto.randomUUID()}@gmail.com`,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  });
+      type: "USER_CREATED",
+      version: 1,
+      date: new Date(),
+      data: {
+        identifier: crypto.randomUUID(),
+        email: `${crypto.randomUUID()}@gmail.com`,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    });
 
-  console.log("Saving event done.");
-}));
+    console.log("Saving event done.");
+  })
+});
 
 const state = getState();
 
