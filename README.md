@@ -91,7 +91,7 @@ const eventStore = createEventStore<State, Event>({
       users: []
     }
   }),
-  adapter: MemoryEventAdapter.for<Event>({
+  eventAdapter: MemoryEventAdapter.for<Event>({
     events: []
   }),
   replay: (state, event) => {
