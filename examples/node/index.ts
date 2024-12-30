@@ -43,64 +43,79 @@ type State = z.infer<typeof stateSchema>
 
 type Event = z.infer<typeof eventSchema>;
 
-const { transaction, getState } = createEventStore<State, Event>({
-  parser: eventSchema.parse,
-  adapter: NodeJsonStreamAdapter.for({
-    path: "database.jsonl",
-  }),
-  state: {
-    users: []
-  },
-  replay: (state, event) => {
-    switch (event.type) {
-      case "USER_CREATED":
-        return {
-          ...state,
-          users: [
-            ...state.users,
-            {
-              createdAt: event.data.createdAt,
-              email: event.data.email,
-              identifier: event.data.identifier,
-              updatedAt: event.data.updatedAt,
-            },
-          ]
-        }
+async function main() {
+  const { saveEvent, transaction, getState, initialize } = createEventStore<State, Event>({
+    parser: eventSchema.parse,
+    adapter: NodeJsonStreamAdapter.for({
+      path: "database.jsonl",
+    }),
+    state: {
+      users: []
+    },
+    replay: (state, event) => {
+      switch (event.type) {
+        case "USER_CREATED":
+          return {
+            ...state,
+            users: [
+              ...state.users,
+              {
+                createdAt: event.data.createdAt,
+                email: event.data.email,
+                identifier: event.data.identifier,
+                updatedAt: event.data.updatedAt,
+              },
+            ]
+          }
 
-      case "USER_DELETED":
-        return {
-          ...state,
-          users: state.users.filter(user => {
-            return user.identifier !== event.data.identifier
-          })
-        };
-    }
-  }
-});
-
-console.log("Saving events...");
-
-await transaction(async ({ commit }) => {
-  Array.from(Array(100)).forEach((_, index) => {
-    console.log(`Saving event #${index + 1}...`);
-
-    commit({
-      identifier: crypto.randomUUID(),
-      type: "USER_CREATED",
-      version: 1,
-      date: new Date(),
-      data: {
-        identifier: crypto.randomUUID(),
-        email: `${crypto.randomUUID()}@gmail.com`,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        case "USER_DELETED":
+          return {
+            ...state,
+            users: state.users.filter(user => {
+              return user.identifier !== event.data.identifier
+            })
+          };
       }
-    });
+    }
+  });
 
-    console.log("Saving event done.");
-  })
+  const error = await initialize();
+
+  if (error instanceof Error) {
+    console.error("error while opening the database.");
+    return;
+  }
+
+  await transaction(async ({ commit, rollback }) => {
+    try {
+      await Promise.all(Array.from(Array(10)).map(async (_, index) => {
+        await saveEvent({
+          identifier: crypto.randomUUID(),
+          type: "USER_CREATED",
+          version: 1,
+          date: new Date(),
+          data: {
+            identifier: crypto.randomUUID(),
+            email: `user-${index + 1}@gmail.com`,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        });
+      }));
+
+      await commit();
+    } catch {
+      rollback();
+    }
+  });
+
+  console.log("Fetching state...");
+
+  const state = getState();
+
+  console.log(state);
+}
+
+main().catch(error => {
+  console.error(error);
 });
-
-const state = getState();
-
-console.log(state);
