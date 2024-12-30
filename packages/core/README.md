@@ -202,6 +202,8 @@ For the times where you need to prevent write before finishing an action while o
 
 Using the `saveEvent` method in here is highly unrecommended since it is already called by the `transaction` function after the callback returns and it could lead to data inconsistencies.
 
+The `commit` function exposed inside the `transaction` callback is used to save all wanted events, while the `rollback` function is used to discard all events that should be saved in case of an error for instance.
+
 ```typescript
 const usersToSave = [
   { email: "first@app.com" },
@@ -210,34 +212,33 @@ const usersToSave = [
 ];
 
 eventStore.transaction(async ({ commit, rollback }) => {
-  const state = eventStore.getState();
+  try {
+    const state = eventStore.getState();
 
-  for (const user of users) {
-    const shouldBeSaved = state.users.every(user => {
-      return usersToSave.every(userToSave => {
-        return userToSave.email !== user.email;
+    for (const user of users) {
+      const shouldBeSaved = state.users.every(user => {
+        return usersToSave.every(userToSave => {
+          return userToSave.email !== user.email;
+        });
       });
-    });
 
-    if (shouldBeSaved) {
-      commit({
-        type: "USER_CREATED",
-        identifier: crypto.randomUUID(),
-        version: 1,
-        date: new Date(),
-        data: {
-          id: crypto.randomUUID(),
-          email: user.email,
-        },
-      });
+      if (shouldBeSaved) {
+        await saveEvent({
+          type: "USER_CREATED",
+          identifier: crypto.randomUUID(),
+          version: 1,
+          date: new Date(),
+          data: {
+            id: crypto.randomUUID(),
+            email: user.email,
+          },
+        });
+      }
     }
 
-    const unexpectedErrorOccurred = Math.random() > 0.5;
-
-    if (unexpectedErrorOccurred) {
-      rollback();
-      return;
-    }
+    await commit();
+  } catch {
+    rollback();
   }
 });
 ```
