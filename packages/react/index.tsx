@@ -1,4 +1,4 @@
-import { Adapter, EventShape, EventStoreParser, Replay, TransactionCallbackFunction, createEventStore } from "@cristaline/core";
+import { EventAdapter, EventShape, EventStoreParser, Replay, StateAdapter, TransactionCallbackFunction, createEventStore } from "@cristaline/core";
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 
 export interface EventStoreContextInterface<State, Event extends EventShape> {
@@ -16,7 +16,7 @@ export interface EventStoreProviderProps {
 export interface DefineStoreOptions<State, Event> {
   state: State,
   parser: EventStoreParser<Event>,
-  adapter: Adapter<Event>,
+  eventAdapter: EventAdapter<Event>,
   replay: Replay<State, Event>
 }
 
@@ -50,7 +50,7 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
   });
 
   const eventStore = createEventStore<State, Event>({
-    adapter: options.adapter,
+    eventAdapter: options.eventAdapter,
     parser: options.parser,
     replay: options.replay,
     state: options.state
@@ -77,6 +77,7 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
 
         await eventStore.saveEvent(event);
 
+        const events = await eventStore.getEvents();
         setState({
           type: "loaded",
           value: eventStore.getState()

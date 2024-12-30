@@ -54,7 +54,7 @@ export interface EventStore<State, Event> {
 
 export type ReleaseLockFunction = () => void;
 
-export interface Adapter<Event> {
+export interface EventAdapter<Event> {
   readonly save: (event: Event) => Promise<void>
   readonly retrieve: () => Promise<unknown[]>
   readonly requestLock: () => Promise<ReleaseLockFunction>
@@ -67,7 +67,7 @@ export type InitializeFunction = () => Promise<null | CorruptionError>
 export interface CreateEventStoreOptions<State, Event> {
   readonly state: State,
   readonly parser: EventStoreParser<Event>,
-  readonly adapter: Adapter<Event>,
+  readonly eventAdapter: EventAdapter<Event>,
   readonly replay: Replay<State, Event>,
 }
 
@@ -89,10 +89,9 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
     const releaseLock = await options.adapter.requestLock();
 
     try {
-      await options.adapter.save(event);
 
       state = options.replay(state, event);
-      events.push(event);
+      await options.eventAdapter.save(event);
 
       subscribers.forEach(notify => {
         notify();
@@ -110,7 +109,7 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
     const releaseLock = await options.adapter.requestLock();
 
     try {
-      const receivedEvents: unknown[] = await options.adapter.retrieve();
+      const receivedEvents: unknown[] = await options.eventAdapter.retrieve();
       const parsedEvents: Event[] = [];
 
       if (receivedEvents instanceof Error) {
@@ -127,8 +126,6 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
         parsedEvents.push(parsedEvent);
         state = options.replay(state, parsedEvent);
       }
-
-      events = parsedEvents;
 
       return null;
 

@@ -1,11 +1,11 @@
-import { Adapter, ReleaseLockFunction } from "@cristaline/core";
+import { EventAdapter } from "@cristaline/core";
 
 export interface WebStorageAdapterOptions {
   storage: Storage,
   key: string
 }
 
-export class WebStorageAdapter<Event> implements Adapter<Event> {
+export class WebStorageAdapter<Event> implements EventAdapter<Event> {
   private lock: Promise<void> | null = null;
 
   private constructor(private readonly storage: Storage, private readonly eventsKey: string) { }

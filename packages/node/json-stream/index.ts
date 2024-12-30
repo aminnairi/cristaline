@@ -1,4 +1,4 @@
-import { Adapter, ReleaseLockFunction } from "@cristaline/core";
+import { EventAdapter, ReleaseLockFunction } from "@cristaline/core";
 import { appendFile, readFile, stat, writeFile } from "node:fs/promises";
 
 export interface NodeJsonStreamAdapterOptions {
@@ -32,7 +32,7 @@ export function createLock() {
   return acquireLock;
 }
 
-export class NodeJsonStreamAdapter<Event> implements Adapter<Event> {
+export class NodeJsonStreamAdapter<Event> implements EventAdapter<Event> {
   private lock: Promise<void> | null = null;
 
   private constructor(private readonly path: string) { }
