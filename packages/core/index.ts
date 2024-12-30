@@ -79,6 +79,8 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
   let events: Event[] = [];
 
   async function saveEvent(event: Event): Promise<null | Error> {
+    const releaseLock = await options.adapter.requestLock();
+
     try {
       await options.adapter.save(event);
 
@@ -92,6 +94,8 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
       return null;
     } catch (error) {
       return error instanceof Error ? error : new Error(String(error));
+    } finally {
+      releaseLock();
     }
   }
 
@@ -167,8 +171,15 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
         rollback
       });
 
-      for (const uncommitedEvent of uncommitedEvents) {
-        await saveEvent(uncommitedEvent);
+      while (uncommitedEvents.length > 0) {
+        const uncommitedEvent = uncommitedEvents[0];
+
+        await options.adapter.save(uncommitedEvent);
+
+        state = options.replay(state, uncommitedEvent);
+
+        events.push(uncommitedEvent);
+
         uncommitedEvents.splice(0, 1);
       }
 
