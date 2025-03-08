@@ -38,10 +38,10 @@ type State = {
 }
 
 export const { EventStoreProvider, useEventStore } = defineEventStore<State, Event>({
-  parser: eventSchema.parse,
   eventAdapter: WebStorageEventAdapter.for<Event>({
     key: "events",
-    storage: localStorage
+    storage: localStorage,
+    parser: eventSchema.parse,
   }),
   stateAdapter: MemoryStateAdapter.for<State>({
     state: {
