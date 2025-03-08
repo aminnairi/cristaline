@@ -15,7 +15,6 @@ export interface EventStoreProviderProps {
 }
 
 export interface DefineStoreOptions<State, Event> {
-  parser: EventStoreParser<Event>,
   eventAdapter: EventAdapter<Event>,
   stateAdapter: StateAdapter<State>,
   replay: Replay<State, Event>
