@@ -73,7 +73,14 @@ console.log(eventStore.getState());
 
 ### Versions
 
+- [`1.0.0`](#100)
 - [`0.1.0`](#010)
+
+### 1.0.0
+
+#### Major changes
+
+- Renamed the `StorageEventAdapter` class to `StorageEvent`
 
 ### 0.1.0
 
