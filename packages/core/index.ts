@@ -54,9 +54,9 @@ export interface EventStore<State, Event> {
 
 export type ReleaseLockFunction = () => void;
 
-export interface EventAdapter<Event> {
   readonly save: (event: Event) => Promise<void>
   readonly retrieve: () => Promise<Event[]>
+export interface Event<GenericEvent> {
 }
 
 export type EventStoreParser<Event> = (event: unknown) => Event | Error
@@ -74,6 +74,7 @@ export interface CreateEventStoreOptions<State, Event> {
   readonly eventAdapter: EventAdapter<Event>,
   readonly stateAdapter: StateAdapter<State>,
   readonly replay: Replay<State, Event>,
+  readonly event: Event<GenericEvent>,
 }
 
 export function createEventStore<State, Event extends EventShape>(options: CreateEventStoreOptions<State, Event>): EventStore<State, Event> {
@@ -245,8 +246,8 @@ export interface MemoryEventAdapterOptions<Event> {
   readonly parser: (events: unknown[]) => Event[]
 }
 
-export class MemoryEventAdapter<Event> implements EventAdapter<Event> {
   private constructor(private readonly events: unknown[], private readonly parse: (events: unknown[]) => Event[]) { }
+export class MemoryEvent<GenericEvent> implements Event<GenericEvent> {
 
   public static for<Event>(options: MemoryEventAdapterOptions<Event>): MemoryEventAdapter<Event> {
     return new MemoryEventAdapter(options.events, options.parser);
