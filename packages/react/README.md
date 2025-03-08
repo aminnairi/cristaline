@@ -2,6 +2,8 @@
 
 React.js bridge for `@cristaline/core`
 
+[![NPM Version](https://img.shields.io/npm/v/%40cristaline%2Freact)](https://www.npmjs.com/package/@cristaline/react) [![NPM License](https://img.shields.io/npm/l/%40cristaline%2Freact)](./LICENSE) [![npm package minimized gzipped size (scoped)](https://img.shields.io/bundlejs/size/%40cristaline/react)](https://bundlejs.com/?q=%40cristaline%2Freact)
+
 ## Requirements
 
 - [Node](https://nodejs.org/)
