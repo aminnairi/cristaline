@@ -2,6 +2,8 @@
 
 An immutable database engine based on log streams.
 
+[![NPM Version](https://img.shields.io/npm/v/%40cristaline%2Fcore)](https://www.npmjs.com/package/@cristaline/core) [![NPM License](https://img.shields.io/npm/l/%40cristaline%2Fcore)](./LICENSE) [![npm package minimized gzipped size (scoped)](https://img.shields.io/bundlejs/size/%40cristaline/core)](https://bundlejs.com/?q=%40cristaline%2Fcore)
+
 ## Requirements
 
 - [Node](https://nodejs.org)
