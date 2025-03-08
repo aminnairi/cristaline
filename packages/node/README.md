@@ -1,6 +1,8 @@
 # @cristaline/node
 
-Node adapters for @cristaline/core
+Node adapters for `@cristaline/core`
+
+[![NPM Version](https://img.shields.io/npm/v/%40cristaline%2Fnode)](https://www.npmjs.com/package/@cristaline/node) [![NPM License](https://img.shields.io/npm/l/%40cristaline%2Fnode)](./LICENSE) [![npm package minimized gzipped size (scoped)](https://img.shields.io/bundlejs/size/%40cristaline/node)](https://bundlejs.com/?q=%40cristaline%2Fnod)
 
 ## Installation
 
