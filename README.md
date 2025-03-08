@@ -11,6 +11,51 @@ Package | Description
 [`@cristaline/web`](./packages/web) | Web API's bridge for cristaline
 [`@cristaline/react`](./packages/react) | React.js bridge for cristaline
 
+## Contributing
+
+### Requirements
+
+- Git
+- Docker
+- Docker Compose
+
+### Clone the repository
+
+```bash
+git clone https://github.com/aminnairi/cristaline
+cd cristaline
+```
+
+### Start the container
+
+```bash
+docker compose up --detach
+```
+
+### Install the dependencies
+
+```bash
+docker compose exec node npm install
+```
+
+### Start the Node example
+
+```bash
+docker compose exec node npm --workspace examples/node run dev
+```
+
+### Start the React example
+
+```bash
+docker compose exec node npm --workspace examples/react run dev
+```
+
+### Stop the container
+
+```bash
+docker compose down --remove-orphans --volumes --timeout 0
+```
+
 ## What Is cristaline
 
 Cristaline is a library designed to help you manage your database as a stream of logs instead of a constant final state.
