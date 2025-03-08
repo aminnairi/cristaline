@@ -70,10 +70,9 @@ export interface State<GenericState> {
 
 export type InitializeFunction = () => Promise<null | CorruptionError>
 
-  readonly eventAdapter: EventAdapter<Event>,
-  readonly stateAdapter: StateAdapter<State>,
 export interface CreateEventStoreOptions<GenericState, GenericEvent> {
   readonly event: Event<GenericEvent>,
+  readonly state: State<GenericState>,
   readonly replay: Replay<GenericState, GenericEvent>,
 }
 
@@ -107,9 +106,9 @@ export function createEventStore<GenericState, GenericEvent extends EventShape>(
     const releaseLock = await requestLock();
 
     try {
-      await options.eventAdapter.save(event);
-      const state = await options.stateAdapter.retrieve();
       await options.stateAdapter.save(options.replay(state, event));
+      await options.event.save(event);
+      await options.state.save(options.replay(state, event));
 
       subscribers.forEach(notify => {
         notify();
@@ -127,8 +126,7 @@ export function createEventStore<GenericState, GenericEvent extends EventShape>(
     const releaseLock = await requestLock();
 
     try {
-      const events = await options.eventAdapter.retrieve();
-      const state = await options.stateAdapter.retrieve();
+      const events = await options.event.retrieve();
 
       for (const event of events) {
         options.stateAdapter.save(options.replay(state, event));
@@ -143,12 +141,12 @@ export function createEventStore<GenericState, GenericEvent extends EventShape>(
     }
   }
 
-    return options.stateAdapter.retrieve();
   function getState(): Promise<Readonly<GenericState>> {
+    return options.state.retrieve();
   }
 
-    const events = await options.eventAdapter.retrieve();
   async function getEvents(): Promise<ReadonlyArray<GenericEvent> | CorruptionError> {
+    const events = await options.event.retrieve();
     return events;
   }
 
@@ -179,11 +177,11 @@ export function createEventStore<GenericState, GenericEvent extends EventShape>(
 
         const uncommitedEvent = uncommitedEvents[0];
 
-        await options.eventAdapter.save(uncommitedEvent);
+        await options.event.save(uncommitedEvent);
 
-        const state = await options.stateAdapter.retrieve();
+        const state = await options.state.retrieve();
 
-        await options.stateAdapter.save(options.replay(state, uncommitedEvent));
+        await options.state.save(options.replay(state, uncommitedEvent));
 
         uncommitedEvents.splice(0, 1);
       }
