@@ -305,8 +305,25 @@ eventStore.subscribe(() => {
 
 ### Summary
 
+- [`2.0.0`](#200)
 - [`1.0.0`](#100)
 - [`0.1.0`](#010)
+
+### 2.0.0
+
+#### Major changes
+
+- Renamed the `StateAdapter` interface to `State` and the `EventAdapter` interface to `Event`
+- Added a new `initial` property in the `State` interface for setting the initial state
+- Added a new `reset` method in the `State` interface for resetting the state
+
+#### Minor changes
+
+None.
+
+#### Bug & security fixes
+
+None.
 
 ### 1.0.0
 
