@@ -3,7 +3,7 @@
   "type": "module",
   "name": "@cristaline/example-node",
   "scripts": {
-    "start": "tsx index.ts"
+    "dev": "tsx --watch index.ts"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
