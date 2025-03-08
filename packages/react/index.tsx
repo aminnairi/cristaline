@@ -1,4 +1,4 @@
-import { EventAdapter, EventShape, Replay, StateAdapter, TransactionCallbackFunction, createEventStore } from "@cristaline/core";
+import { Event, EventShape, Replay, State, TransactionCallbackFunction, createEventStore } from "@cristaline/core";
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 
 export interface EventStoreContextInterface<State, Event extends EventShape> {
@@ -13,10 +13,10 @@ export interface EventStoreProviderProps {
   children: ReactNode
 }
 
-export interface DefineStoreOptions<State, Event> {
-  eventAdapter: EventAdapter<Event>,
-  stateAdapter: StateAdapter<State>,
-  replay: Replay<State, Event>
+export interface DefineStoreOptions<GenericState, GenericEvent> {
+  event: Event<GenericEvent>,
+  state: State<GenericState>,
+  replay: Replay<GenericState, GenericEvent>
 }
 
 export type Loading = {
@@ -28,15 +28,15 @@ export type Issue = {
   error: Error
 }
 
-export type Loaded<Value> = {
+export type Loaded<GenericValue> = {
   type: "loaded",
-  value: Value
+  value: GenericValue
 }
 
-export type TransientState<Value> = Loading | Issue | Loaded<Value>
+export type TransientState<GenericValue> = Loading | Issue | Loaded<GenericValue>
 
-export function defineEventStore<State, Event extends EventShape>(options: DefineStoreOptions<State, Event>) {
-  const EventStoreContext = createContext<EventStoreContextInterface<State, Event>>({
+export function defineEventStore<GenericState, GenericEvent extends EventShape>(options: DefineStoreOptions<GenericState, GenericEvent>) {
+  const EventStoreContext = createContext<EventStoreContextInterface<GenericState, GenericEvent>>({
     events: {
       type: "loading"
     },
@@ -48,22 +48,22 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
     refresh: async () => { }
   });
 
-  const eventStore = createEventStore<State, Event>({
-    eventAdapter: options.eventAdapter,
-    stateAdapter: options.stateAdapter,
+  const eventStore = createEventStore<GenericState, GenericEvent>({
+    event: options.event,
+    state: options.state,
     replay: options.replay,
   });
 
   function EventStoreProvider({ children }: EventStoreProviderProps) {
-    const [events, setEvents] = useState<TransientState<ReadonlyArray<Event>>>({
+    const [events, setEvents] = useState<TransientState<ReadonlyArray<GenericEvent>>>({
       type: "loading"
     });
 
-    const [state, setState] = useState<TransientState<Readonly<State>>>({
+    const [state, setState] = useState<TransientState<Readonly<GenericState>>>({
       type: "loading"
     });
 
-    const saveEvent = useMemo(() => async (event: Event) => {
+    const saveEvent = useMemo(() => async (event: GenericEvent) => {
       try {
         setEvents({
           type: "loading"
@@ -199,7 +199,7 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
       }
     }, []);
 
-    const value = useMemo((): EventStoreContextInterface<State, Event> => {
+    const value = useMemo((): EventStoreContextInterface<GenericState, GenericEvent> => {
       return {
         state,
         events,
