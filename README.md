@@ -8,6 +8,7 @@ Package | Description
 ---|---
 [`@cristaline/core`](./packages/core) | An immutable database based on log streams
 [`@cristaline/node`](./packages/node) | Node.js adapters for @cristaline/core
+[`@cristaline/web`](./packages/web) | Web API's bridge for cristaline
 [`@cristaline/react`](./packages/react) | React.js bridge for cristaline
 
 ## What Is cristaline
