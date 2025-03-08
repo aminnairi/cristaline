@@ -54,32 +54,32 @@ export interface EventStore<State, Event> {
 
 export type ReleaseLockFunction = () => void;
 
-  readonly save: (event: Event) => Promise<void>
-  readonly retrieve: () => Promise<Event[]>
 export interface Event<GenericEvent> {
+  readonly save: (event: GenericEvent) => Promise<void>
+  readonly retrieve: () => Promise<GenericEvent[]>
 }
 
-export type EventStoreParser<Event> = (event: unknown) => Event | Error
+export type EventStoreParser<GenericEvent> = (event: unknown) => GenericEvent | Error
 
 // PROJECTION ADAPTER
 
-export interface StateAdapter<State> {
-  readonly save: (state: State) => Promise<void>
-  readonly retrieve: () => Promise<State>
+export interface State<GenericState> {
+  readonly save: (state: GenericState) => Promise<void>
+  readonly retrieve: () => Promise<GenericState>
 }
 
 export type InitializeFunction = () => Promise<null | CorruptionError>
 
-export interface CreateEventStoreOptions<State, Event> {
   readonly eventAdapter: EventAdapter<Event>,
   readonly stateAdapter: StateAdapter<State>,
-  readonly replay: Replay<State, Event>,
+export interface CreateEventStoreOptions<GenericState, GenericEvent> {
   readonly event: Event<GenericEvent>,
+  readonly replay: Replay<GenericState, GenericEvent>,
 }
 
-export function createEventStore<State, Event extends EventShape>(options: CreateEventStoreOptions<State, Event>): EventStore<State, Event> {
+export function createEventStore<GenericState, GenericEvent extends EventShape>(options: CreateEventStoreOptions<GenericState, GenericEvent>): EventStore<GenericState, GenericEvent> {
   const subscribers: Subscriber[] = [];
-  const uncommitedEvents: Event[] = [];
+  const uncommitedEvents: GenericEvent[] = [];
 
   let inTransaction: boolean = false;
   let lock: Promise<void> | null = null;
@@ -98,7 +98,7 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
     return releaseLock;
   }
 
-  async function saveEvent(event: Event): Promise<null | Error> {
+  async function saveEvent(event: GenericEvent): Promise<null | Error> {
     if (inTransaction) {
       uncommitedEvents.push(event);
       return null;
@@ -143,12 +143,12 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
     }
   }
 
-  function getState(): Promise<Readonly<State>> {
     return options.stateAdapter.retrieve();
+  function getState(): Promise<Readonly<GenericState>> {
   }
 
-  async function getEvents(): Promise<ReadonlyArray<Event> | CorruptionError> {
     const events = await options.eventAdapter.retrieve();
+  async function getEvents(): Promise<ReadonlyArray<GenericEvent> | CorruptionError> {
     return events;
   }
 
@@ -221,22 +221,22 @@ export function createEventStore<State, Event extends EventShape>(options: Creat
   }
 }
 
-export interface MemoryStateAdapterOptions<State> {
-  readonly state: State
+export interface MemoryStateOptions<GenericState> {
+  readonly state: GenericState
 }
 
-export class MemoryStateAdapter<State> implements StateAdapter<State> {
-  private constructor(private state: State) { }
+export class MemoryState<GenericState> implements State<GenericState> {
+  private constructor(private state: GenericState, public readonly initial: GenericState) { }
 
-  public static for<State>(options: MemoryStateAdapterOptions<State>): MemoryStateAdapter<State> {
-    return new MemoryStateAdapter(options.state);
+  public static for<GenericState>(options: MemoryStateOptions<GenericState>): MemoryState<GenericState> {
+    return new MemoryState(options.state, options.state);
   }
 
-  public async save(state: State): Promise<void> {
+  public async save(state: GenericState): Promise<void> {
     this.state = state;
   }
 
-  public async retrieve(): Promise<State> {
+  public async retrieve(): Promise<GenericState> {
     return this.state;
   }
 }
@@ -246,18 +246,18 @@ export interface MemoryEventAdapterOptions<Event> {
   readonly parser: (events: unknown[]) => Event[]
 }
 
-  private constructor(private readonly events: unknown[], private readonly parse: (events: unknown[]) => Event[]) { }
 export class MemoryEvent<GenericEvent> implements Event<GenericEvent> {
+  private constructor(private readonly events: unknown[], private readonly parse: (events: unknown[]) => GenericEvent[]) { }
 
-  public static for<Event>(options: MemoryEventAdapterOptions<Event>): MemoryEventAdapter<Event> {
     return new MemoryEventAdapter(options.events, options.parser);
+  public static for<GenericEvent extends EventShape>(options: MemoryEventAdapterOptions<GenericEvent>): MemoryEvent<GenericEvent> {
   }
 
-  public async save(event: Event): Promise<void> {
+  public async save(event: GenericEvent): Promise<void> {
     this.events.push(event);
   }
 
-  public async retrieve(): Promise<Event[]> {
+  public async retrieve(): Promise<GenericEvent[]> {
     return this.parse(this.events);
   }
 }
