@@ -3,6 +3,7 @@
   "workspaces": [
     "packages/core",
     "packages/node",
+    "packages/web",
     "packages/react",
     "examples/node",
     "examples/react"
