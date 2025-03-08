@@ -111,7 +111,23 @@ export default function App() {
 
 ### Versions
 
+- [`1.0.0`](#100)
 - [`0.1.0`](#010)
+
+### 1.0.0
+
+#### Major changes
+
+- Renamed the `eventAdapter` property from the arguments of the `defineEventStore` function to `event`
+- Renamed the `stateAdapter` property from the arguments of the `defineEventStore` function to `state`
+
+#### Minor changes
+
+None.
+
+#### Bug & security fixes
+
+None.
 
 ### 0.1.0
 
