@@ -1,5 +1,9 @@
 # @cristaline/web
 
+Web bridge for the `@cristaline/core` package
+
+[![NPM Version](https://img.shields.io/npm/v/%40cristaline%2Fweb)](https://www.npmjs.com/package/@cristaline/web) [![NPM License](https://img.shields.io/npm/l/%40cristaline%2Fweb)](./LICENSE) [![npm package minimized gzipped size (scoped)](https://img.shields.io/bundlejs/size/%40cristaline/web)](https://bundlejs.com/?q=%40cristaline%2Fweb)
+
 ## Requirements
 
 - [Node](https://nodejs.org/)
