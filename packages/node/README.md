@@ -112,7 +112,23 @@ JsonStreamEvent.for({
 
 ### Versions
 
+- [`1.0.0`](#100)
 - [`0.1.0`](#010)
+
+### 1.0.0
+
+#### Major changes
+
+- Renamed the `JsonStreamEventAdapter` class to `JsonStreamEvent`
+- Renamed the `JsonStreamEventAdapterOptions` interface to `JsonStreamEventOptions`
+
+#### Minor changes
+
+None.
+
+#### Bug & security fixes
+
+None.
 
 ### 0.1.0
 
