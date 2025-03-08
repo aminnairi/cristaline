@@ -1,8 +1,9 @@
-import { EventAdapter, ReleaseLockFunction } from "@cristaline/core";
+import { EventAdapter, EventShape } from "@cristaline/core";
 import { appendFile, readFile, stat, writeFile } from "node:fs/promises";
 
-export interface NodeJsonStreamAdapterOptions {
+export interface JsonStreamAdapterOptions<Event extends EventShape> {
   readonly path: string,
+  readonly parser: (events: unknown) => Event
 }
 
 export function createLock() {
@@ -32,11 +33,11 @@ export function createLock() {
   return acquireLock;
 }
 
-export class NodeJsonStreamEventAdapter<Event> implements EventAdapter<Event> {
-  private constructor(private readonly path: string) { }
+export class JsonStreamEventAdapter<Event> implements EventAdapter<Event> {
+  private constructor(private readonly path: string, private readonly parse: (events: unknown) => Event) { }
 
-  public static for<Event>(options: NodeJsonStreamAdapterOptions) {
-    return new NodeJsonStreamEventAdapter<Event>(options.path);
+  public static for<Event extends EventShape>(options: JsonStreamAdapterOptions<Event>) {
+    return new JsonStreamEventAdapter<Event>(options.path, options.parser);
   }
 
   public async save(event: Event): Promise<void> {
@@ -49,7 +50,7 @@ export class NodeJsonStreamEventAdapter<Event> implements EventAdapter<Event> {
     await appendFile(this.path, JSON.stringify(event) + ",\n");
   }
 
-  public async retrieve(): Promise<unknown[]> {
+  public async retrieve(): Promise<Event[]> {
     const pathStat = await stat(this.path).catch(() => ({ isFile: () => false }));
 
     if (!pathStat.isFile()) {
@@ -60,12 +61,19 @@ export class NodeJsonStreamEventAdapter<Event> implements EventAdapter<Event> {
 
     const text = (buffer.toString() + "]").replace(/,(?=\s*])/m, "");
 
-    const deserializedEvents = JSON.parse(text);
+    const deserializedEvents: unknown[] = JSON.parse(text);
 
     if (!Array.isArray(deserializedEvents)) {
       throw new Error("Corupted database");
     }
 
-    return deserializedEvents;
+    const events: Event[] = [];
+
+    for (const deserializedEvent of deserializedEvents) {
+      const event = this.parse(deserializedEvent);
+      events.push(event);
+    }
+
+    return events;
   }
 }

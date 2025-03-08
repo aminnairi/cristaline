@@ -1,7 +1,7 @@
 {
   "type": "module",
-  "name": "@cristaline/adapter-event-node-json-stream",
-  "description": "Node.js File API adapter based on the JSON stream format.",
+  "name": "@cristaline/node",
+  "description": "Node.js adapters for @cristaline/core",
   "version": "0.1.0",
   "license": "MIT",
   "bugs": {
