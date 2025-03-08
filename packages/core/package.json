@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@cristaline/core",
   "description": "An immutable database based on log streams.",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "index.ts",
   "license": "MIT",
   "bugs": {
