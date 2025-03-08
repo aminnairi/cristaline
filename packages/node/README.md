@@ -14,8 +14,8 @@ npm install @cristaline/node
 import type { EventShape } from "@cristaline/core";
 import type { ZodSchema } from "zod";
 
-import { JsonStreamEventAdapter } from "@cristaline/node";
-import { MemoryStateAdatper, createEventStore } from "@cristaline/core";
+import { JsonStreamEvent } from "@cristaline/node";
+import { MemoryState, createEventStore } from "@cristaline/core";
 import { z } from "zod";
 
 const eventSchema = z.object({
@@ -43,11 +43,11 @@ type State = {
 }
 
 createEventStore({
-  eventAdapter: JsonStreamEventAdapter.for({
+  event: JsonStreamEvent.for({
     path: "database.jsonl",
     parser: eventSchema.parse
   }),
-  stateAdapter: MemoryStateAdapter.for({
+  state: MemoryState.for({
     state: {
       todos: []
     }
@@ -69,15 +69,15 @@ createEventStore({
 
 ## Usage
 
-### JsonStreamEventAdapter
+### JsonStreamEvent
 
 Adapter for events that utilizes the JSONL standard to store events in a file.
 
 It is an array of JSON objects that is infinite and that has no closing bracket for the wrapper array. Allows for extremely fast insertion while being easy to manipulate when retrieving data.
 
-#### JsonStreamEventAdapter.for
+#### JsonStreamEvent.for
 
-Method used to initialize a new instanceo of the `JsonStreamEventAdapter` class, which adheres to the `EventAdapter` interface from the `@cristaline/core` library.
+Method used to initialize a new instanceo of the `JsonStreamEvent` class, which adheres to the `Event` interface from the `@cristaline/core` library.
 
 > [!NOTE]
 > You don't have to strictly call the file extension `jsonl`, this is simply used for better debugging if you ever need to open that file in a text editor.
@@ -88,7 +88,7 @@ Method used to initialize a new instanceo of the `JsonStreamEventAdapter` class,
 ```typescript
 import type { EventShape } from "@cristaline/core";
 
-import { JsonStreamEventAdapter } from "@cristaline/node";
+import { JsonStreamEvent } from "@cristaline/node";
 import { z } from "zod";
 
 const eventSchema = z.object({
@@ -102,7 +102,7 @@ const eventSchema = z.object({
   })
 }) satisfies ZodSchema<EventShape>
 
-const eventAdapter = JsonStreamEventAdapter.for({
+JsonStreamEvent.for({
   path: "./path/to/your/database.jsonl",
   parse: eventSchema.parse
 });

@@ -18,8 +18,8 @@ touch src/main.ts
 import type { EventShape } from "@cristaline/core";
 import type { ZodSchema } from "zod";
 
-import { createEventStore, MemoryStateAdapter } from "@cristaline/core";
-import { StorageEventAdapter } from "@cristaline/web";
+import { createEventStore, MemoryState } from "@cristaline/core";
+import { StorageEvent } from "@cristaline/web";
 import { z } from "zod";
 
 const eventSchema = z.object({
@@ -43,13 +43,15 @@ type State = {
 }
 
 const eventStore = createEventStore({
-  eventAdapter: StorageEventAdapter.for({
+  event: StorageEvent.for({
     storage: localStorage,
     key: "events",
     parser: eventSchema.parse
   }),
-  stateAdapter: MemoryStateAdapter.for({
-    todos: []
+  state: MemoryState.for({
+    state: {
+      todos: []
+    }
   }),
   replay: (state, event) => {
     return {

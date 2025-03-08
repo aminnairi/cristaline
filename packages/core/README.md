@@ -28,7 +28,7 @@ touch index.ts
 import type { EventShape } from "@cristaline/core";
 import type { ZodSchema } from "zod";
 
-import { MemoryEventAdapter, MemoryStateAdapter, createEventStore } from "@cristaline/core";
+import { MemoryEvent, MemoryState, createEventStore } from "@cristaline/core";
 import { z } from "zod";
 
 const eventSchema = z.object({
@@ -53,12 +53,12 @@ type State = {
   todos: Todo[]
 }
 
-const eventStore = createEventStore({
-  eventAdapter: MemoryEventAdapter.for({
+const eventStore = createEventStore<State, Event>({
+  event: MemoryEvent.for<Event>({
     events: [],
-    parser: eventSchema
+    parser: eventSchema.parse
   }),
-  stateAdapter: MemoryStateAdapter.for({
+  state: MemoryState.for<State>({
     state: {
       todos: []
     }
@@ -93,7 +93,7 @@ Create the shape of the event, and how to create a projection from those events.
 > We recommend using a parser library like [Zod](https://zod.dev/) in order to validate the integrity of your events.
 
 ```typescript
-import { EventShape, createEventStore, MemoryStateAdapter, MemoryEventAdapter } from "@cristaline/core";
+import { EventShape, createEventStore, MemoryState, MemoryEvent } from "@cristaline/core";
 import { ZodSchema, z } from "zod";
 
 const eventSchema = z.union([
@@ -130,12 +130,12 @@ type State = {
 }
 
 const eventStore = createEventStore<State, Event>({
-  stateAdapter: MemoryStateAdapter.for<State>({
+  state: MemoryState.for<State>({
     state: {
       users: []
     }
   }),
-  eventAdapter: MemoryEventAdapter.for<Event>({
+  event: MemoryEvent.for<Event>({
     events: [],
     parser: eventSchema.parse,
   }),
