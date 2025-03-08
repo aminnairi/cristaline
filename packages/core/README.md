@@ -10,7 +10,75 @@ An immutable database engine based on log streams.
 ## Installation
 
 ```bash
-npm install @cristaline/core
+mkdir project
+cd project
+npm init --yes
+npm install @cristaline/core zod tsx
+```
+
+> [!WARNING]
+> It is highly recommended to use a parsing library like [Zod](https://zod.dev/) in order to ease the creation of robust and resilient schemas, but you can use any library of your choice.
+
+
+```bash
+touch index.ts
+```
+
+```typescript
+import type { EventShape } from "@cristaline/core";
+import type { ZodSchema } from "zod";
+
+import { MemoryEventAdapter, MemoryStateAdapter, createEventStore } from "@cristaline/core";
+import { z } from "zod";
+
+const eventSchema = z.object({
+  id: z.string(),
+  date: z.date({ coerce: true }),
+  type: z.literal("TodoAdded"),
+  version: z.literal(1),
+  data: z.object({
+    id: z.string(),
+    title: z.string()
+  })
+}) satisfies ZodSchema<EventShape>
+
+type Event = z.infer<typeof eventSchema>;
+
+type Todo = {
+  id: string,
+  title: string
+}
+
+type State = {
+  todos: Todo[]
+}
+
+const eventStore = createEventStore({
+  eventAdapter: MemoryEventAdapter.for({
+    events: [],
+    parser: eventSchema
+  }),
+  stateAdapter: MemoryStateAdapter.for({
+    state: {
+      todos: []
+    }
+  }),
+  replay: (state, event) => {
+    return {
+      ...state,
+      todos: [
+        ...state.todos,
+        event.data
+      ]
+    }
+  }
+});
+
+await eventStore.initialize();
+
+const state = await eventStore.getState();
+
+console.log(state);
 ```
 
 ## API
@@ -193,7 +261,7 @@ const usersToSave = [
 
 eventStore.transaction(async ({ commit, rollback }) => {
   try {
-    const state = eventStore.getState();
+    const state = await eventStore.getState();
 
     for (const user of users) {
       const shouldBeSaved = state.users.every(user => {
