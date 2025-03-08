@@ -66,6 +66,8 @@ export type EventStoreParser<GenericEvent> = (event: unknown) => GenericEvent | 
 export interface State<GenericState> {
   readonly save: (state: GenericState) => Promise<void>
   readonly retrieve: () => Promise<GenericState>
+  readonly initial: GenericState
+  readonly reset: () => Promise<void>
 }
 
 export type InitializeFunction = () => Promise<null | CorruptionError>
@@ -106,8 +108,8 @@ export function createEventStore<GenericState, GenericEvent extends EventShape>(
     const releaseLock = await requestLock();
 
     try {
-      await options.stateAdapter.save(options.replay(state, event));
       await options.event.save(event);
+      const state = await options.state.retrieve();
       await options.state.save(options.replay(state, event));
 
       subscribers.forEach(notify => {
@@ -128,12 +130,16 @@ export function createEventStore<GenericState, GenericEvent extends EventShape>(
     try {
       const events = await options.event.retrieve();
 
+      let computedState = options.state.initial;
+
       for (const event of events) {
-        options.stateAdapter.save(options.replay(state, event));
+        computedState = options.replay(computedState, event);
       }
 
-      return null;
+      await options.state.reset();
+      await options.state.save(computedState);
 
+      return null;
     } catch (error) {
       return error instanceof Error ? new CorruptionError([error]) : new CorruptionError([new Error(String(error))]);
     } finally {
@@ -173,8 +179,6 @@ export function createEventStore<GenericState, GenericEvent extends EventShape>(
 
     async function commit(): Promise<void> {
       while (uncommitedEvents.length > 0) {
-        console.log("DEBUG: commiting event...");
-
         const uncommitedEvent = uncommitedEvents[0];
 
         await options.event.save(uncommitedEvent);
@@ -226,6 +230,10 @@ export interface MemoryStateOptions<GenericState> {
 export class MemoryState<GenericState> implements State<GenericState> {
   private constructor(private state: GenericState, public readonly initial: GenericState) { }
 
+  public async reset(): Promise<void> {
+    this.state = this.initial;
+  }
+
   public static for<GenericState>(options: MemoryStateOptions<GenericState>): MemoryState<GenericState> {
     return new MemoryState(options.state, options.state);
   }
@@ -247,8 +255,8 @@ export interface MemoryEventAdapterOptions<Event> {
 export class MemoryEvent<GenericEvent> implements Event<GenericEvent> {
   private constructor(private readonly events: unknown[], private readonly parse: (events: unknown[]) => GenericEvent[]) { }
 
-    return new MemoryEventAdapter(options.events, options.parser);
   public static for<GenericEvent extends EventShape>(options: MemoryEventAdapterOptions<GenericEvent>): MemoryEvent<GenericEvent> {
+    return new MemoryEvent(options.events, options.parser);
   }
 
   public async save(event: GenericEvent): Promise<void> {
