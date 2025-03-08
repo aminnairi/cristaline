@@ -1,7 +1,7 @@
-import { EventAdapter, EventShape } from "@cristaline/core";
+import { Event, EventShape } from "@cristaline/core";
 import { appendFile, readFile, stat, writeFile } from "node:fs/promises";
 
-export interface JsonStreamAdapterOptions<Event extends EventShape> {
+export interface JsonStreamEventOptions<Event extends EventShape> {
   readonly path: string,
   readonly parser: (events: unknown) => Event
 }
@@ -11,9 +11,7 @@ export function createLock() {
 
   async function acquireLock() {
     if (lock instanceof Promise) {
-      console.log("Waiting for lock to be released...");
       await lock;
-      console.log("Lock released");
     }
 
     let release: () => void = () => { };
@@ -33,14 +31,14 @@ export function createLock() {
   return acquireLock;
 }
 
-export class JsonStreamEventAdapter<Event> implements EventAdapter<Event> {
-  private constructor(private readonly path: string, private readonly parse: (events: unknown) => Event) { }
+export class JsonStreamEvent<GenericEvent> implements Event<GenericEvent> {
+  private constructor(private readonly path: string, private readonly parse: (events: unknown) => GenericEvent) { }
 
-  public static for<Event extends EventShape>(options: JsonStreamAdapterOptions<Event>) {
-    return new JsonStreamEventAdapter<Event>(options.path, options.parser);
+  public static for<GenericEvent extends EventShape>(options: JsonStreamEventOptions<GenericEvent>) {
+    return new JsonStreamEvent<GenericEvent>(options.path, options.parser);
   }
 
-  public async save(event: Event): Promise<void> {
+  public async save(event: GenericEvent): Promise<void> {
     const pathStat = await stat(this.path).catch(() => ({ isFile: () => false }));
 
     if (!pathStat.isFile()) {
@@ -50,7 +48,7 @@ export class JsonStreamEventAdapter<Event> implements EventAdapter<Event> {
     await appendFile(this.path, JSON.stringify(event) + ",\n");
   }
 
-  public async retrieve(): Promise<Event[]> {
+  public async retrieve(): Promise<GenericEvent[]> {
     const pathStat = await stat(this.path).catch(() => ({ isFile: () => false }));
 
     if (!pathStat.isFile()) {
@@ -67,7 +65,7 @@ export class JsonStreamEventAdapter<Event> implements EventAdapter<Event> {
       throw new Error("Corupted database");
     }
 
-    const events: Event[] = [];
+    const events: GenericEvent[] = [];
 
     for (const deserializedEvent of deserializedEvents) {
       const event = this.parse(deserializedEvent);
