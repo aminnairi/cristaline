@@ -1,5 +1,4 @@
-import React from "react";
-import { EventAdapter, EventShape, EventStoreParser, Replay, StateAdapter, TransactionCallbackFunction, createEventStore } from "@cristaline/core";
+import { EventAdapter, EventShape, Replay, StateAdapter, TransactionCallbackFunction, createEventStore } from "@cristaline/core";
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 
 export interface EventStoreContextInterface<State, Event extends EventShape> {
