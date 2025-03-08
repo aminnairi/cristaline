@@ -1,4 +1,4 @@
-import { EventAdapter, EventShape, EventStoreParser } from "@cristaline/core";
+import { Event, EventShape, EventStoreParser } from "@cristaline/core";
 
 export interface StorageEventAdapterOptions<Event extends EventShape> {
   storage: Storage,
@@ -6,24 +6,23 @@ export interface StorageEventAdapterOptions<Event extends EventShape> {
   parser: EventStoreParser<Event>
 }
 
-export class StorageEventAdapter<Event extends EventShape> implements EventAdapter<Event> {
-  private constructor(private readonly storage: Storage, private readonly eventsKey: string, private readonly parse: EventStoreParser<Event>) { }
+export class StorageEvent<GenericEvent extends EventShape> implements Event<GenericEvent> {
+  private constructor(private readonly storage: Storage, private readonly eventsKey: string, private readonly parse: EventStoreParser<GenericEvent>) { }
 
-
-  public static for<Event extends EventShape>({ storage, key: eventsKey, parser }: StorageEventAdapterOptions<Event>): StorageEventAdapter<Event> {
-    return new StorageEventAdapter(storage, eventsKey, parser);
+  public static for<GenericEvent extends EventShape>({ storage, key: eventsKey, parser }: StorageEventAdapterOptions<GenericEvent>): StorageEvent<GenericEvent> {
+    return new StorageEvent(storage, eventsKey, parser);
   }
 
-  public async save(event: Event): Promise<void> {
+  public async save(event: GenericEvent): Promise<void> {
     const events = this.storage.getItem(this.eventsKey) ?? "[";
 
     this.storage.setItem(this.eventsKey, events + JSON.stringify(event) + ",");
   }
 
-  public async retrieve(): Promise<Event[]> {
+  public async retrieve(): Promise<GenericEvent[]> {
     const serializedEvents = ((this.storage.getItem(this.eventsKey) ?? "[") + "]").replace(/,(?=\s*])/, "");
     const deserializedEvents: unknown[] = JSON.parse(serializedEvents);
-    const events: Event[] = [];
+    const events: GenericEvent[] = [];
 
     if (!Array.isArray(deserializedEvents)) {
       throw new Error("Events not stored as array");
