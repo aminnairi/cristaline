@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@cristaline/web",
   "description": "Web Storage API adapter based on the JSON stream format.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/aminnairi/cristaline/issues"
