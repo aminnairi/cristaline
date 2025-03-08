@@ -1,3 +1,4 @@
+import React from "react";
 import { EventAdapter, EventShape, EventStoreParser, Replay, StateAdapter, TransactionCallbackFunction, createEventStore } from "@cristaline/core";
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 
@@ -52,7 +53,6 @@ export function defineEventStore<State, Event extends EventShape>(options: Defin
   const eventStore = createEventStore<State, Event>({
     eventAdapter: options.eventAdapter,
     stateAdapter: options.stateAdapter,
-    parser: options.parser,
     replay: options.replay,
   });
 
