@@ -12,6 +12,6 @@
     "url": "git+https://github.com/aminnairi/cristaline.git"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2"
+    "@types/node": "^24.0.4"
   }
 }
