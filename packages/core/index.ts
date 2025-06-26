@@ -22,7 +22,11 @@ export class TransactionError extends Error {
   }
 }
 
-export type Replay<State, Event> = (previousState: State, event: Event) => State
+// export type Replay<State, Event> = (previousState: State, event: Event) => State
+
+export type Replay<State, GenericEvent extends EventShape> = {
+  [Type in GenericEvent["type"]]: (previousState: State, event: Extract<GenericEvent, { type: Type }>) => State
+}
 
 export type Subscriber = () => void;
 
@@ -72,7 +76,7 @@ export interface State<GenericState> {
 
 export type InitializeFunction = () => Promise<null | CorruptionError>
 
-export interface CreateEventStoreOptions<GenericState, GenericEvent> {
+export interface CreateEventStoreOptions<GenericState, GenericEvent extends EventShape> {
   readonly event: Event<GenericEvent>,
   readonly state: State<GenericState>,
   readonly replay: Replay<GenericState, GenericEvent>,
@@ -110,7 +114,8 @@ export function createEventStore<GenericState, GenericEvent extends EventShape>(
     try {
       await options.event.save(event);
       const state = await options.state.retrieve();
-      await options.state.save(options.replay(state, event));
+
+      await options.state.save(options.replay[event.type as GenericEvent["type"]](state, event as Extract<GenericEvent, { type: typeof event.type }>));
 
       subscribers.forEach(notify => {
         notify();
@@ -133,7 +138,7 @@ export function createEventStore<GenericState, GenericEvent extends EventShape>(
       let computedState = options.state.initial;
 
       for (const event of events) {
-        computedState = options.replay(computedState, event);
+        computedState = options.replay[event.type as GenericEvent["type"]](computedState, event as Extract<GenericEvent, { type: typeof event.type }>);
       }
 
       await options.state.reset();
@@ -141,6 +146,7 @@ export function createEventStore<GenericState, GenericEvent extends EventShape>(
 
       return null;
     } catch (error) {
+      console.log(error);
       return error instanceof Error ? new CorruptionError([error]) : new CorruptionError([new Error(String(error))]);
     } finally {
       releaseLock();
@@ -185,7 +191,7 @@ export function createEventStore<GenericState, GenericEvent extends EventShape>(
 
         const state = await options.state.retrieve();
 
-        await options.state.save(options.replay(state, uncommitedEvent));
+        await options.state.save(options.replay[uncommitedEvent.type as GenericEvent["type"]](state, uncommitedEvent as Extract<GenericEvent, { type: typeof uncommitedEvent.type }>));
 
         uncommitedEvents.splice(0, 1);
       }
