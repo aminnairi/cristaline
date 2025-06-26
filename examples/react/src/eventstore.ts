@@ -48,31 +48,30 @@ export const { EventStoreProvider, useEventStore } = defineEventStore<State, Eve
       users: []
     }
   }),
-  replay: (state, event) => {
-    switch (event.type) {
-      case "USER_CREATED":
-        return {
-          ...state,
-          users: [
-            ...state.users,
-            event.data
-          ]
-        }
+  replay: {
+    USER_CREATED: (state, event) => {
+      return {
+        ...state,
+        users: [
+          ...state.users,
+          event.data
+        ]
+      }
+    },
+    USER_UPDATED: (state, event) => {
+      return {
+        ...state,
+        users: state.users.map(user => {
+          if (user.id !== event.data.id) {
+            return user;
+          }
 
-      case "USER_UPDATED":
-        return {
-          ...state,
-          users: state.users.map(user => {
-            if (user.id !== event.data.id) {
-              return user;
-            }
-
-            return {
-              ...user,
-              ...event.data
-            }
-          })
-        }
+          return {
+            ...user,
+            ...event.data
+          }
+        })
+      }
     }
-  }
+  },
 });
