@@ -55,31 +55,30 @@ async function main() {
         users: []
       }
     }),
-    replay: (state, event) => {
-      switch (event.type) {
-        case "USER_CREATED":
-          return {
-            ...state,
-            users: [
-              ...state.users,
-              {
-                createdAt: event.data.createdAt,
-                email: event.data.email,
-                identifier: event.data.identifier,
-                updatedAt: event.data.updatedAt,
-              },
-            ]
-          }
-
-        case "USER_DELETED":
-          return {
-            ...state,
-            users: state.users.filter(user => {
-              return user.identifier !== event.data.identifier
-            })
-          };
+    replay: {
+      USER_CREATED: (state, event) => {
+        return {
+          ...state,
+          users: [
+            ...state.users,
+            {
+              createdAt: event.data.createdAt,
+              email: event.data.email,
+              identifier: event.data.identifier,
+              updatedAt: event.data.updatedAt,
+            },
+          ]
+        }
+      },
+      USER_DELETED: (state, event) => {
+        return {
+          ...state,
+          users: state.users.filter(user => {
+            return user.identifier !== event.data.identifier
+          })
+        };
       }
-    }
+    },
   });
 
   const error = await initialize();
