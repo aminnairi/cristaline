@@ -65,13 +65,15 @@ const eventStore = createEventStore<State, Event>({
       todos: []
     }
   }),
-  replay: (state, event) => {
-    return {
-      ...state,
-      todos: [
-        ...state.todos,
-        event.data
-      ]
+  replay: {
+    TodoAdded: (state, event) => {
+      return {
+        ...state,
+        todos: [
+          ...state.todos,
+          event.data
+        ]
+      }
     }
   }
 });
@@ -100,7 +102,7 @@ import { ZodSchema, z } from "zod";
 
 const eventSchema = z.union([
   z.object({
-    type: z.literal("USER_CREATED"),
+    type: z.literal("UserCreated"),
     version: z.literal(1),
     identifier: z.string(),
     date: z.date({ coerce: true }),
@@ -110,7 +112,7 @@ const eventSchema = z.union([
     }),
   }) satisfies ZodSchema<EventShape>,
   z.object({
-    type: z.literal("USER_UPDATED"),
+    type: z.literal("UserUpdated"),
     version: z.literal(1),
     identifier: z.string(),
     date: z.date({ coerce: true }),
@@ -141,31 +143,30 @@ const eventStore = createEventStore<State, Event>({
     events: [],
     parser: eventSchema.parse,
   }),
-  replay: (state, event) => {
-    switch (event.type) {
-      case "USER_CREATED":
-        return {
-          ...state,
-          users: [
-            ...state.users,
-            user,
-          ],
-        }
+  replay: {
+    UserCreated: (state, event) => {
+      return {
+        ...state,
+        users: [
+          ...state.users,
+          user,
+        ],
+      }
+    },
+    UserUpdated: (state, event) => {
+      return {
+        ...state,
+        users: state.users.map(user => {
+          if (user.id !== event.data.id) {
+            return user;
+          }
 
-      case "USER_UPDATED":
-        return {
-          ...state,
-          users: state.users.map(user => {
-            if (user.id !== event.data.id) {
-              return user;
-            }
-
-            return {
-              ...user,
-              ...event.data,
-            };
-          }),
-        }
+          return {
+            ...user,
+            ...event.data,
+          };
+        }),
+      }
     }
   },
 });
@@ -307,9 +308,24 @@ eventStore.subscribe(() => {
 
 ### Summary
 
+- [`3.0.0`](#300)
 - [`2.0.0`](#200)
 - [`1.0.0`](#100)
 - [`0.1.0`](#010)
+
+### 3.0.0
+
+#### Major Changes
+
+- The `replay` property for the `createEventStore` function now accepted an object with the type of each defined events as its properties, instead of a function
+
+#### Minor changes
+
+None.
+
+#### Bug & security fixes
+
+None.
 
 ### 2.0.0
 
