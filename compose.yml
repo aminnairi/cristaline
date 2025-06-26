@@ -2,7 +2,7 @@ services:
   node:
     container_name: node
     restart: unless-stopped
-    image: node:22.0.0-alpine
+    image: node:24.3.0-alpine3.22
     user: node
     tty: true
     stdin_open: true
