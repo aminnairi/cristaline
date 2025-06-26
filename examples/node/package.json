@@ -6,10 +6,10 @@
     "dev": "tsx --watch index.ts"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
-    "tsx": "^4.19.2"
+    "@types/express": "^5.0.3",
+    "tsx": "^4.20.3"
   },
   "dependencies": {
-    "express": "^4.21.2"
+    "express": "^5.1.0"
   }
 }
